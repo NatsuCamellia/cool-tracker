@@ -33,6 +33,10 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -50,7 +54,6 @@ import net.natsucamellia.cooltracker.model.Course
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AssignmentScreen(
     coolViewModel: CoolViewModel
@@ -59,75 +62,88 @@ fun AssignmentScreen(
         when (coolUiState) {
             is CoolViewModel.CoolUiState.Error -> ErrorScreen { coolViewModel.loadCourses() }
             is CoolViewModel.CoolUiState.Loading -> LoadingScreen { coolViewModel.loadCourses() }
-            is CoolViewModel.CoolUiState.Success -> {
-                val refreshState = rememberPullToRefreshState()
-                PullToRefreshBox(
-                    isRefreshing = coolViewModel.isRefreshing,
-                    onRefresh = { coolViewModel.loadCourses() },
-                    state = refreshState,
-                    indicator = {
-                        LoadingIndicator(
-                            state = refreshState,
-                            isRefreshing = coolViewModel.isRefreshing,
-                            modifier = Modifier.align(Alignment.TopCenter)
-                        )
-                    }
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .verticalScroll(rememberScrollState())
-                    ) {
-                        Text(
-                            "Ongoing",
-                            style = MaterialTheme.typography.displaySmall,
-                            fontWeight = FontWeight.Bold
-                        )
-
-                        if (coolUiState.courses.any { course -> course.assignments.any { it.dueTime > Clock.System.now() } }) {
-                            coolUiState.courses.forEach {
-                                CourseCard(
-                                    course = it,
-                                    onGoing = true,
-                                    modifier = Modifier.padding(vertical = 16.dp)
-                                )
-                            }
-                        } else {
-                            Text(
-                                "No ongoing assignments",
-                                style = MaterialTheme.typography.titleLarge,
-                                modifier = Modifier.padding(vertical = 16.dp)
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(32.dp))
-                        Text(
-                            "Closed",
-                            style = MaterialTheme.typography.displaySmall,
-                            fontWeight = FontWeight.Bold
-                        )
-                        if (coolUiState.courses.any { course -> course.assignments.any { it.dueTime <= Clock.System.now() } }) {
-                            coolUiState.courses.forEach {
-                                CourseCard(
-                                    course = it,
-                                    onGoing = false,
-                                    modifier = Modifier.padding(vertical = 16.dp)
-                                )
-                            }
-                        } else {
-                            Text(
-                                "No closed assignments",
-                                style = MaterialTheme.typography.titleLarge,
-                                modifier = Modifier.padding(vertical = 16.dp)
-                            )
-                        }
-                    }
-                }
+            is CoolViewModel.CoolUiState.Success -> SuccessScreen(coolUiState) { onDone ->
+                coolViewModel.loadCourses(onDone = onDone)
             }
         }
     }
+}
 
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun SuccessScreen(
+    uiState: CoolViewModel.CoolUiState.Success,
+    modifier: Modifier = Modifier,
+    onRefresh: (() -> Unit) -> Unit = {},
+) {
+    var isRefreshing by remember { mutableStateOf(false) }
+    val refreshState = rememberPullToRefreshState()
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = {
+            isRefreshing = true
+            onRefresh { isRefreshing = false }
+        },
+        state = refreshState,
+        indicator = {
+            LoadingIndicator(
+                state = refreshState,
+                isRefreshing = isRefreshing,
+                modifier = Modifier.align(Alignment.TopCenter)
+            )
+        },
+        modifier = modifier
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
+            Text(
+                "Ongoing",
+                style = MaterialTheme.typography.displaySmall,
+                fontWeight = FontWeight.Bold
+            )
 
+            if (uiState.courses.any { course -> course.assignments.any { it.dueTime > Clock.System.now() } }) {
+                uiState.courses.forEach {
+                    CourseCard(
+                        course = it,
+                        onGoing = true,
+                        modifier = Modifier.padding(vertical = 16.dp)
+                    )
+                }
+            } else {
+                Text(
+                    "No ongoing assignments",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(vertical = 16.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+            Text(
+                "Closed",
+                style = MaterialTheme.typography.displaySmall,
+                fontWeight = FontWeight.Bold
+            )
+            if (uiState.courses.any { course -> course.assignments.any { it.dueTime <= Clock.System.now() } }) {
+                uiState.courses.forEach {
+                    CourseCard(
+                        course = it,
+                        onGoing = false,
+                        modifier = Modifier.padding(vertical = 16.dp)
+                    )
+                }
+            } else {
+                Text(
+                    "No closed assignments",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(vertical = 16.dp)
+                )
+            }
+        }
+    }
 }
 
 @Composable

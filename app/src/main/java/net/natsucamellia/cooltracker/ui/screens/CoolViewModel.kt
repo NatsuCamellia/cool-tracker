@@ -19,8 +19,6 @@ import net.natsucamellia.cooltracker.model.Course
 class CoolViewModel(
     private val coolRepository: CoolRepository
 ) : ViewModel() {
-    var isRefreshing by mutableStateOf(false)
-        private set
     var coolLoginState by mutableStateOf<CoolLoginState>(CoolLoginState.Init)
     private val _coolUiState = MutableStateFlow<CoolUiState>(CoolUiState.Loading)
     val coolUiState = _coolUiState.asStateFlow()
@@ -35,13 +33,12 @@ class CoolViewModel(
         }
     }
 
-    fun loadCourses() {
+    fun loadCourses(
+        onDone: () -> Unit = {}
+    ) {
         if (_coolUiState.value is CoolUiState.Error) {
             // Retry
             _coolUiState.value = CoolUiState.Loading
-        } else if (_coolUiState.value is CoolUiState.Success) {
-            // Reload
-            isRefreshing = true
         }
 
         viewModelScope.launch {
@@ -51,9 +48,7 @@ class CoolViewModel(
             } else {
                 _coolUiState.value = CoolUiState.Success(courses)
             }
-            if (isRefreshing) {
-                isRefreshing = false
-            }
+            onDone()
         }
     }
 
