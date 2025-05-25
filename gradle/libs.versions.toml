@@ -14,6 +14,7 @@ kotlinxDatetime = "0.6.2"
 lifecycleViewmodelComposeAndroid = "2.9.0"
 retrofit = "3.0.0"
 converterGson = "3.0.0"
+kotlinxCoroutinesAndroid = "1.10.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -36,6 +37,7 @@ kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime",
 androidx-lifecycle-viewmodel-compose-android = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose-android", version.ref = "lifecycleViewmodelComposeAndroid" }
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "converterGson" }
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

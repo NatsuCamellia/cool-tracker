@@ -1,6 +1,9 @@
 package net.natsucamellia.cooltracker.data
 
 import android.util.Log
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.datetime.Instant
 import net.natsucamellia.cooltracker.model.Assignment
 import net.natsucamellia.cooltracker.model.Course
@@ -25,18 +28,23 @@ class NetworkCoolRepository(
         return if (response.isSuccessful) {
             val courseDTOs = response.body() ?: emptyList()
             Log.d("NetworkCoolRepository", "getActiveCourses: $courseDTOs")
-            courseDTOs.mapNotNull {
-                val assignments = getCourseAssignments(it.id)
-                if (assignments != null) {
-                    Course(
-                        id = it.id,
-                        name = it.name,
-                        courseCode = it.courseCode,
-                        assignments = assignments
-                    )
-                } else {
-                    null
-                }
+            coroutineScope {
+                courseDTOs.map {
+                    async {
+                        val assignments = getCourseAssignments(it.id)
+                        if (assignments != null) {
+                            Course(
+                                id = it.id,
+                                name = it.name,
+                                courseCode = it.courseCode,
+                                assignments = assignments
+                            )
+                        } else {
+                            null
+                        }
+                    }
+                }.awaitAll()
+                    .filterNotNull()
             }
         } else {
             Log.e("NetworkCoolRepository", "getActiveCourses: ${response.errorBody()}")
