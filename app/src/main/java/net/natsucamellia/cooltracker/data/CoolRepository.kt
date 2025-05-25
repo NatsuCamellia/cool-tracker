@@ -1,26 +1,72 @@
 package net.natsucamellia.cooltracker.data
 
+import android.content.SharedPreferences
 import android.util.Log
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.datetime.Instant
+import net.natsucamellia.cooltracker.crypto.KeystoreManager
 import net.natsucamellia.cooltracker.model.Assignment
 import net.natsucamellia.cooltracker.model.Course
 import net.natsucamellia.cooltracker.network.CoolApiService
+import androidx.core.content.edit
 
 interface CoolRepository {
     fun saveUserSessionCookies(cookies: String?)
+    fun clearUserSessionCookies()
+    suspend fun loadStoredUserSessionCookies(): Boolean
     suspend fun getActiveCourses(): List<Course>?
 }
 
 class NetworkCoolRepository(
-    private val coolApiService: CoolApiService
+    private val coolApiService: CoolApiService,
+    private val sharedPref: SharedPreferences,
+    private val keystoreManager: KeystoreManager = KeystoreManager()
 ) : CoolRepository {
     private var userSessionCookies: String? = null
 
     override fun saveUserSessionCookies(cookies: String?) {
         userSessionCookies = cookies
+        if (cookies != null) {
+            val encryptedPair = keystoreManager.encrypt(cookies)
+            encryptedPair?.let { (encryptedCookies, iv) ->
+                sharedPref.edit {
+                    putString(KEY_ENCRYPTED_COOKIES, encryptedCookies)
+                    putString(KEY_IV, iv)
+                    apply()
+                }
+                Log.d(TAG, "User session cookies saved successfully.")
+            } ?: run {
+                Log.e(TAG, "Failed to encrypt cookies.")
+            }
+        }
+    }
+
+    override fun clearUserSessionCookies() {
+        userSessionCookies = null
+        sharedPref.edit {
+            remove(KEY_ENCRYPTED_COOKIES)
+            remove(KEY_IV)
+            apply()
+        }
+        Log.d(TAG, "User session cookies cleared successfully.")
+    }
+
+    override suspend fun loadStoredUserSessionCookies(): Boolean {
+        val encryptedData = sharedPref.getString(KEY_ENCRYPTED_COOKIES, null)
+        val iv = sharedPref.getString(KEY_IV, null)
+
+        return if (encryptedData != null && iv != null) {
+            keystoreManager.decrypt(encryptedData, iv)?.let { cookies ->
+                val response = coolApiService.getActiveCourses(cookies)
+                userSessionCookies = cookies
+                response.isSuccessful
+            } ?: false
+        } else {
+            Log.d(TAG, "No stored user session cookies found.")
+            false
+        }
     }
 
     override suspend fun getActiveCourses(): List<Course>? {
@@ -47,6 +93,7 @@ class NetworkCoolRepository(
                     .filterNotNull()
             }
         } else {
+            Log.d("NetworkCoolRepository", "getActiveCourses: $response")
             Log.e("NetworkCoolRepository", "getActiveCourses: ${response.errorBody()}")
             null
         }
@@ -79,4 +126,9 @@ class NetworkCoolRepository(
         }
     }
 
+    companion object {
+        private const val TAG = "NetworkCoolRepository"
+        private const val KEY_ENCRYPTED_COOKIES = "encrypted_cool_cookies"
+        private const val KEY_IV = "cool_cookies_iv"
+    }
 }

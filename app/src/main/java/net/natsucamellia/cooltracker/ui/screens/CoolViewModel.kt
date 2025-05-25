@@ -19,11 +19,21 @@ import net.natsucamellia.cooltracker.model.Course
 class CoolViewModel(
     private val coolRepository: CoolRepository
 ) : ViewModel() {
-    var isLoggedIn by mutableStateOf(false)
     var isRefreshing by mutableStateOf(false)
         private set
+    var coolLoginState by mutableStateOf<CoolLoginState>(CoolLoginState.Init)
     private val _coolUiState = MutableStateFlow<CoolUiState>(CoolUiState.Loading)
     val coolUiState = _coolUiState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            coolLoginState = if (coolRepository.loadStoredUserSessionCookies()) {
+                CoolLoginState.LoggedIn
+            } else {
+                CoolLoginState.LoggedOut
+            }
+        }
+    }
 
     fun loadCourses() {
         if (_coolUiState.value is CoolUiState.Error) {
@@ -47,6 +57,11 @@ class CoolViewModel(
         }
     }
 
+    fun logout() {
+        coolRepository.clearUserSessionCookies()
+        coolLoginState = CoolLoginState.LoggedOut
+    }
+
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
@@ -55,6 +70,13 @@ class CoolViewModel(
                 CoolViewModel(coolRepository)
             }
         }
+    }
+
+    sealed interface CoolLoginState {
+        data object Init : CoolLoginState
+        data object LoggedIn : CoolLoginState
+        data object LoggedOut : CoolLoginState
+        data object LoggingIn : CoolLoginState
     }
 
     sealed interface CoolUiState {
