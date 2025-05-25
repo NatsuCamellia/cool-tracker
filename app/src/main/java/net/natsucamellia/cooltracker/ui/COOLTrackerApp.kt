@@ -15,11 +15,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import net.natsucamellia.cooltracker.nav.NavigationItem
 import net.natsucamellia.cooltracker.ui.screens.AssignmentScreen
+import net.natsucamellia.cooltracker.ui.screens.CoolViewModel
+import net.natsucamellia.cooltracker.ui.screens.LoginWebViewScreen
 
 @Composable
 fun COOLTrackerApp() {
+    val coolViewModel: CoolViewModel = viewModel()
     var currentScreen by remember { mutableStateOf<NavigationItem>(NavigationItem.Assignments) }
     val navigationItems = listOf(
         NavigationItem.Courses,
@@ -27,25 +31,38 @@ fun COOLTrackerApp() {
         NavigationItem.Grades
     )
 
-    Scaffold(
-        bottomBar = {
-            NavigationBar {
-                navigationItems.forEach { screen ->
-                    NavigationBarItem(
-                        icon = { Icon(if (currentScreen == screen) screen.filledIcon else screen.outlinedIcon, contentDescription = screen.title) },
-                        label = { Text(screen.title) },
-                        selected = currentScreen == screen,
-                        onClick = { currentScreen = screen }
-                    )
-                }
+    if (!coolViewModel.isLoggedIn) {
+        Scaffold { innerPadding ->
+            LoginWebViewScreen(modifier = Modifier.padding(innerPadding)) {
+                coolViewModel.isLoggedIn = true
             }
         }
-    ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding)) { // Apply innerPadding to content
-            when (currentScreen) {
-                NavigationItem.Assignments -> AssignmentScreen()
-                NavigationItem.Courses -> PlaceholderScreen(title = "Courses Screen") // Placeholder
-                NavigationItem.Grades -> PlaceholderScreen(title = "Grades Screen")   // Placeholder
+    } else {
+        Scaffold(
+            bottomBar = {
+                NavigationBar {
+                    navigationItems.forEach { screen ->
+                        NavigationBarItem(
+                            icon = {
+                                Icon(
+                                    if (currentScreen == screen) screen.filledIcon else screen.outlinedIcon,
+                                    contentDescription = screen.title
+                                )
+                            },
+                            label = { Text(screen.title) },
+                            selected = currentScreen == screen,
+                            onClick = { currentScreen = screen }
+                        )
+                    }
+                }
+            }
+        ) { innerPadding ->
+            Box(modifier = Modifier.padding(innerPadding)) { // Apply innerPadding to content
+                when (currentScreen) {
+                    NavigationItem.Assignments -> AssignmentScreen(coolViewModel)
+                    NavigationItem.Courses -> PlaceholderScreen(title = "Courses Screen") // Placeholder
+                    NavigationItem.Grades -> PlaceholderScreen(title = "Grades Screen")   // Placeholder
+                }
             }
         }
     }
