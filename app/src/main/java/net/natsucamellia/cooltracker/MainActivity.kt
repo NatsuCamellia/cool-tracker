@@ -13,7 +13,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             COOLTrackerTheme {
-                COOLTrackerApp()
+                COOLTrackerApp(application as CoolApplication)
             }
         }
     }

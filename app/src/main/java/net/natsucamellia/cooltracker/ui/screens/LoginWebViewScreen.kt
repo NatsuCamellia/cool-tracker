@@ -15,13 +15,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 
 const val LOGIN_URL = "https://cool.ntu.edu.tw/login/"
+const val BASE_URL = "https://cool.ntu.edu.tw/"
 const val SUCCESS_URL_PREFIX = "https://cool.ntu.edu.tw/?login_success=1"
+
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun LoginWebViewScreen(
     modifier: Modifier = Modifier,
-    onLoginSuccess: () -> Unit
+    onLoginSuccess: (String) -> Unit
 ) {
     val context = LocalContext.current
 
@@ -37,30 +39,22 @@ fun LoginWebViewScreen(
                     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                         super.onPageStarted(view, url, favicon)
                         Log.d("WebViewCookies", "onPageStarted for $url")
-                        if (url != null && url.startsWith(SUCCESS_URL_PREFIX)) {
+                        if (url == BASE_URL || url != null && url.startsWith(SUCCESS_URL_PREFIX)) {
                             val cookieManager = CookieManager.getInstance()
-                            val cookies: String? = cookieManager.getCookie(url) // Get cookies for the current URL
+                            val cookies: String = cookieManager.getCookie(url) // Get cookies for the current URL
 
-                            if (cookies != null) {
-                                Log.d("WebViewCookies", "Cookies for $url: $cookies")
-                                // Now you have the cookies string.
-                                // You'll likely need to parse this string if you need individual cookie values.
-                                // Example: store them for later use, pass them to onLoginSuccess
-                                // onLoginSuccess(cookies)
-                            } else {
-                                Log.d("WebViewCookies", "No cookies found for $url")
-                            }
+                            Log.d("WebViewCookies", "Cookies for $url: $cookies")
                             // Important: Ensure onLoginSuccess is called on the main thread
                             // if it triggers UI changes or navigation outside of Compose.
                             // For Compose navigation, it's usually fine.
                             if (context is Activity) {
                                 context.runOnUiThread {
-                                    onLoginSuccess()
+                                    onLoginSuccess(cookies)
                                 }
                             } else {
                                 // Fallback or handle differently if not in an Activity context
                                 // This is less common for full-screen composables
-                                onLoginSuccess()
+                                onLoginSuccess(cookies)
                             }
                         }
                     }
@@ -72,11 +66,6 @@ fun LoginWebViewScreen(
                 settings.javaScriptEnabled = true // Enable JavaScript if required by the login page
                 loadUrl(LOGIN_URL)
             }
-        },
-        update = { webView ->
-            // You can use this block to update the WebView if needed,
-            // e.g., when a state in your Composable changes.
-            // For this login screen, loading happens in factory.
         }
     )
 }

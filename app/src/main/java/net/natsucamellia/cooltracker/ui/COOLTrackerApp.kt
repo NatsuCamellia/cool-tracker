@@ -16,14 +16,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
+import net.natsucamellia.cooltracker.CoolApplication
 import net.natsucamellia.cooltracker.nav.NavigationItem
 import net.natsucamellia.cooltracker.ui.screens.AssignmentScreen
 import net.natsucamellia.cooltracker.ui.screens.CoolViewModel
 import net.natsucamellia.cooltracker.ui.screens.LoginWebViewScreen
 
 @Composable
-fun COOLTrackerApp() {
-    val coolViewModel: CoolViewModel = viewModel()
+fun COOLTrackerApp(
+    coolApplication: CoolApplication
+) {
+    val coolViewModel: CoolViewModel = viewModel(factory = CoolViewModel.Factory)
     var currentScreen by remember { mutableStateOf<NavigationItem>(NavigationItem.Assignments) }
     val navigationItems = listOf(
         NavigationItem.Courses,
@@ -33,7 +36,8 @@ fun COOLTrackerApp() {
 
     if (!coolViewModel.isLoggedIn) {
         Scaffold { innerPadding ->
-            LoginWebViewScreen(modifier = Modifier.padding(innerPadding)) {
+            LoginWebViewScreen(modifier = Modifier.padding(innerPadding)) { cookies ->
+                coolApplication.container.coolRepository.saveUserSessionCookies(cookies)
                 coolViewModel.isLoggedIn = true
             }
         }

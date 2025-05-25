@@ -4,44 +4,54 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.delay
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import net.natsucamellia.cooltracker.CoolApplication
+import net.natsucamellia.cooltracker.data.CoolRepository
 import net.natsucamellia.cooltracker.model.Course
-import net.natsucamellia.cooltracker.model.fakeCourse
 
-class CoolViewModel : ViewModel() {
+class CoolViewModel(
+    private val coolRepository: CoolRepository
+) : ViewModel() {
     var isLoggedIn by mutableStateOf(false)
     var isRefreshing by mutableStateOf(false)
         private set
-    var coolUiState: CoolUiState by mutableStateOf(CoolUiState.Loading)
-        private set
+    private val _coolUiState = MutableStateFlow<CoolUiState>(CoolUiState.Loading)
+    val coolUiState = _coolUiState.asStateFlow()
 
-    init {
-        getCourses()
-    }
+    fun loadCourses() {
+        if (_coolUiState.value is CoolUiState.Error) {
+            // Retry
+            _coolUiState.value = CoolUiState.Loading
+        } else if (_coolUiState.value is CoolUiState.Success) {
+            // Reload
+            isRefreshing = true
+        }
 
-    private fun getCourses(isRefresh: Boolean = false) {
         viewModelScope.launch {
-            if (isRefresh) {
-                isRefreshing = true
-            }
-            // Wait 3 seconds
-            delay(3_000)
-            coolUiState = CoolUiState.Success(listOf(fakeCourse))
-//            coolUiState = CoolUiState.Error
-            if (isRefresh) {
+            val courses = coolRepository.getActiveCourses()
+            _coolUiState.value = CoolUiState.Success(courses)
+            if (isRefreshing) {
                 isRefreshing = false
             }
         }
     }
 
-    fun retry() {
-        coolUiState = CoolUiState.Loading
-        getCourses()
+    companion object {
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                val application = (this[APPLICATION_KEY] as CoolApplication)
+                val coolRepository = application.container.coolRepository
+                CoolViewModel(coolRepository)
+            }
+        }
     }
-
-    fun refresh() = getCourses(isRefresh = true)
 
     sealed interface CoolUiState {
         data class Success(val courses: List<Course>) : CoolUiState
