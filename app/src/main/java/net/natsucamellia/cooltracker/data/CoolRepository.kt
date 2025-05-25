@@ -8,7 +8,7 @@ import net.natsucamellia.cooltracker.network.CoolApiService
 
 interface CoolRepository {
     fun saveUserSessionCookies(cookies: String?)
-    suspend fun getActiveCourses(): List<Course>
+    suspend fun getActiveCourses(): List<Course>?
 }
 
 class NetworkCoolRepository(
@@ -20,27 +20,31 @@ class NetworkCoolRepository(
         userSessionCookies = cookies
     }
 
-    override suspend fun getActiveCourses(): List<Course> {
-        // TODO: return optional result
+    override suspend fun getActiveCourses(): List<Course>? {
         val response = coolApiService.getActiveCourses(userSessionCookies)
         return if (response.isSuccessful) {
             val courseDTOs = response.body() ?: emptyList()
             Log.d("NetworkCoolRepository", "getActiveCourses: $courseDTOs")
-            courseDTOs.map {
-                Course(
-                    id = it.id,
-                    name = it.name,
-                    courseCode = it.courseCode,
-                    assignments = getCourseAssignments(it.id)
-                )
+            courseDTOs.mapNotNull {
+                val assignments = getCourseAssignments(it.id)
+                if (assignments != null) {
+                    Course(
+                        id = it.id,
+                        name = it.name,
+                        courseCode = it.courseCode,
+                        assignments = assignments
+                    )
+                } else {
+                    null
+                }
             }
         } else {
             Log.e("NetworkCoolRepository", "getActiveCourses: ${response.errorBody()}")
-            listOf()
+            null
         }
     }
 
-    private suspend fun getCourseAssignments(courseId: Int): List<Assignment> {
+    private suspend fun getCourseAssignments(courseId: Int): List<Assignment>? {
         val response = coolApiService.getCourseAssignments(userSessionCookies, courseId)
 
         return if (response.isSuccessful) {
@@ -63,7 +67,7 @@ class NetworkCoolRepository(
             }
         } else {
             Log.e("NetworkCoolRepository", "getCourseAssignments: ${response.errorBody()}")
-            listOf()
+            null
         }
     }
 

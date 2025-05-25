@@ -36,7 +36,11 @@ class CoolViewModel(
 
         viewModelScope.launch {
             val courses = coolRepository.getActiveCourses()
-            _coolUiState.value = CoolUiState.Success(courses)
+            if (courses == null) {
+                _coolUiState.value = CoolUiState.Error
+            } else {
+                _coolUiState.value = CoolUiState.Success(courses)
+            }
             if (isRefreshing) {
                 isRefreshing = false
             }

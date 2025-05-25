@@ -83,10 +83,19 @@ fun AssignmentScreen(
                             style = MaterialTheme.typography.displaySmall,
                             fontWeight = FontWeight.Bold
                         )
-                        coolUiState.courses.forEach {
-                            CourseCard(
-                                course = it,
-                                onGoing = true,
+
+                        if (coolUiState.courses.any { course -> course.assignments.any { it.dueTime > Clock.System.now() } }) {
+                            coolUiState.courses.forEach {
+                                CourseCard(
+                                    course = it,
+                                    onGoing = true,
+                                    modifier = Modifier.padding(vertical = 16.dp)
+                                )
+                            }
+                        } else {
+                            Text(
+                                "No ongoing assignments",
+                                style = MaterialTheme.typography.titleLarge,
                                 modifier = Modifier.padding(vertical = 16.dp)
                             )
                         }
@@ -97,10 +106,18 @@ fun AssignmentScreen(
                             style = MaterialTheme.typography.displaySmall,
                             fontWeight = FontWeight.Bold
                         )
-                        coolUiState.courses.forEach {
-                            CourseCard(
-                                course = it,
-                                onGoing = false,
+                        if (coolUiState.courses.any { course -> course.assignments.any { it.dueTime <= Clock.System.now() } }) {
+                            coolUiState.courses.forEach {
+                                CourseCard(
+                                    course = it,
+                                    onGoing = false,
+                                    modifier = Modifier.padding(vertical = 16.dp)
+                                )
+                            }
+                        } else {
+                            Text(
+                                "No closed assignments",
+                                style = MaterialTheme.typography.titleLarge,
                                 modifier = Modifier.padding(vertical = 16.dp)
                             )
                         }
