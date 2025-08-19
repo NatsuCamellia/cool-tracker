@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import net.natsucamellia.cooltracker.CoolApplication
 import net.natsucamellia.cooltracker.data.CoolRepository
 import net.natsucamellia.cooltracker.model.Course
+import net.natsucamellia.cooltracker.model.Profile
 
 class CoolViewModel(
     private val coolRepository: CoolRepository
@@ -22,8 +23,11 @@ class CoolViewModel(
     var coolLoginState by mutableStateOf<CoolLoginState>(CoolLoginState.Init)
     private val _coolUiState = MutableStateFlow<CoolUiState>(CoolUiState.Loading)
     val coolUiState = _coolUiState.asStateFlow()
+    private val _accountUiState = MutableStateFlow<AccountUiState>(AccountUiState.Loading)
+    val accountUiState = _accountUiState.asStateFlow()
 
     init {
+        // Try to restore session
         viewModelScope.launch {
             coolLoginState = if (coolRepository.loadStoredUserSessionCookies()) {
                 CoolLoginState.LoggedIn
@@ -47,6 +51,25 @@ class CoolViewModel(
                 _coolUiState.value = CoolUiState.Error
             } else {
                 _coolUiState.value = CoolUiState.Success(courses)
+            }
+            onDone()
+        }
+    }
+
+    fun loadUserProfile(
+        onDone: () -> Unit = {}
+    ) {
+        if (_accountUiState.value is AccountUiState.Error) {
+            // Retry
+            _accountUiState.value = AccountUiState.Loading
+        }
+
+        viewModelScope.launch {
+            val profile = coolRepository.getUserProfile()
+            if (profile == null) {
+                _accountUiState.value = AccountUiState.Error
+            } else {
+                _accountUiState.value = AccountUiState.Success(profile)
             }
             onDone()
         }
@@ -78,5 +101,11 @@ class CoolViewModel(
         data class Success(val courses: List<Course>) : CoolUiState
         data object Error : CoolUiState
         data object Loading : CoolUiState
+    }
+
+    sealed interface AccountUiState {
+        data class Success(val profile: Profile) : AccountUiState
+        data object Error : AccountUiState
+        data object Loading : AccountUiState
     }
 }

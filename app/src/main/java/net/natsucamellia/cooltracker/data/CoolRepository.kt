@@ -11,11 +11,13 @@ import net.natsucamellia.cooltracker.model.Assignment
 import net.natsucamellia.cooltracker.model.Course
 import net.natsucamellia.cooltracker.network.CoolApiService
 import androidx.core.content.edit
+import net.natsucamellia.cooltracker.model.Profile
 
 interface CoolRepository {
     fun saveUserSessionCookies(cookies: String?)
     fun clearUserSessionCookies()
     suspend fun loadStoredUserSessionCookies(): Boolean
+    suspend fun getUserProfile(): Profile?
     suspend fun getActiveCourses(): List<Course>?
 }
 
@@ -66,6 +68,28 @@ class NetworkCoolRepository(
         } else {
             Log.d(TAG, "No stored user session cookies found.")
             false
+        }
+    }
+
+    override suspend fun getUserProfile(): Profile? {
+        val response = coolApiService.getCurrentUserProfile(userSessionCookies)
+        return if (response.isSuccessful) {
+            val profileDTO = response.body()
+            if (profileDTO != null) {
+                Profile(
+                    id = profileDTO.id,
+                    name = profileDTO.name,
+                    bio = profileDTO.bio,
+                    primaryEmail = profileDTO.primaryEmail,
+                    avatarUrl = profileDTO.avatarUrl
+                )
+            } else {
+                null
+            }
+        } else {
+            Log.d("NetworkCoolRepository", "getCurrentUserProfile: $response")
+            Log.e("NetworkCoolRepository", "getCurrentUserProfile: ${response.errorBody()}")
+            null
         }
     }
 
