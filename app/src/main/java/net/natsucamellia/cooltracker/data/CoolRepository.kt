@@ -2,16 +2,17 @@ package net.natsucamellia.cooltracker.data
 
 import android.content.SharedPreferences
 import android.util.Log
+import androidx.core.content.edit
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import kotlinx.datetime.Instant
 import net.natsucamellia.cooltracker.crypto.KeystoreManager
 import net.natsucamellia.cooltracker.model.Assignment
 import net.natsucamellia.cooltracker.model.Course
-import net.natsucamellia.cooltracker.network.CoolApiService
-import androidx.core.content.edit
 import net.natsucamellia.cooltracker.model.Profile
+import net.natsucamellia.cooltracker.network.CoolApiService
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 interface CoolRepository {
     fun saveUserSessionCookies(cookies: String?)
@@ -123,6 +124,7 @@ class NetworkCoolRepository(
         }
     }
 
+    @OptIn(ExperimentalTime::class)
     private suspend fun getCourseAssignments(courseId: Int): List<Assignment>? {
         val response = coolApiService.getCourseAssignments(userSessionCookies, courseId)
 

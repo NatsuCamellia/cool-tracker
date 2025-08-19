@@ -36,7 +36,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format
 import kotlinx.datetime.format.MonthNames
@@ -44,8 +43,10 @@ import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
 import net.natsucamellia.cooltracker.model.Assignment
 import net.natsucamellia.cooltracker.model.Course
+import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
+import kotlin.time.ExperimentalTime
 
 @Composable
 fun AssignmentScreen(
@@ -62,7 +63,10 @@ fun AssignmentScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(
+    ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class,
+    ExperimentalTime::class
+)
 @Composable
 fun SuccessScreen(
     uiState: CoolViewModel.CoolUiState.Success,
@@ -139,6 +143,7 @@ fun SuccessScreen(
     }
 }
 
+@OptIn(ExperimentalTime::class)
 @Composable
 fun CourseCard(
     course: Course,
@@ -168,7 +173,7 @@ fun CourseCard(
     }
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalTime::class)
 @Composable
 fun AssignmentCard(
     assignment: Assignment,
@@ -181,7 +186,7 @@ fun AssignmentCard(
     val format = LocalDateTime.Format {
         monthName(MonthNames.ENGLISH_ABBREVIATED)
         char(' ')
-        dayOfMonth()
+        day()
         char(' ')
         hour()
         char(':')

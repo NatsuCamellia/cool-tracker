@@ -1,7 +1,10 @@
 package net.natsucamellia.cooltracker.model
 
-import kotlinx.datetime.Instant
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
+
+@OptIn(ExperimentalTime::class)
 data class Assignment(
     val id: Int,
     val dueTime: Instant,
@@ -11,6 +14,7 @@ data class Assignment(
     val submissions: List<Submission>
 )
 
+@OptIn(ExperimentalTime::class)
 val fakeAssignment: Assignment = Assignment(
     id = 309627,
     dueTime = Instant.parse("2025-06-11T15:59:59Z"),
