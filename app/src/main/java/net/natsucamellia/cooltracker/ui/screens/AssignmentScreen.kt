@@ -196,8 +196,10 @@ fun AssignmentCard(
     val durationTotal = assignment.dueTime - assignment.createdTime
     val durationElapsed = Clock.System.now() - assignment.createdTime
     val durationRemaining = assignment.dueTime - Clock.System.now()
-    val progress =
+    // Some assignments have due time earlier than created time
+    val progress = if (durationTotal.isPositive())
         durationElapsed.toDouble(DurationUnit.MINUTES) / durationTotal.toDouble(DurationUnit.MINUTES)
+    else 1
 
     Card(modifier = modifier) {
         Column(
