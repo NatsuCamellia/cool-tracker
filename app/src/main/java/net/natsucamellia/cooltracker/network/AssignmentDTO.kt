@@ -10,5 +10,7 @@ data class AssignmentDTO(
     val pointsPossible: Double,
     @SerializedName("created_at")
     val createdAt: String,
-    val name: String
+    val name: String,
+    @SerializedName("has_submitted_submissions")
+    val hasSubmittedSubmissions: Boolean
 )

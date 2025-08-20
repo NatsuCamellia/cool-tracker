@@ -143,7 +143,7 @@ class NetworkCoolRepository(
                         dueTime = Instant.parse(it.dueAt),
                         pointsPossible = it.pointsPossible,
                         createdTime = Instant.parse(it.createdAt),
-                        submissions = listOf()
+                        hasSubmittedSubmissions = it.hasSubmittedSubmissions
                     )
                 }
             }

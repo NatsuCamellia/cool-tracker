@@ -1,19 +1,18 @@
 package net.natsucamellia.cooltracker.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.HourglassTop
-import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -33,16 +32,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format
-import kotlinx.datetime.format.MonthNames
+import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
 import net.natsucamellia.cooltracker.model.Assignment
 import net.natsucamellia.cooltracker.model.Course
+import net.natsucamellia.cooltracker.model.fakeAssignment
 import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
@@ -184,8 +184,8 @@ fun AssignmentCard(
     val dueLocalDateTime =
         assignment.dueTime.toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
     val format = LocalDateTime.Format {
-        monthName(MonthNames.ENGLISH_ABBREVIATED)
-        char(' ')
+        monthNumber(padding = Padding.NONE)
+        char('/')
         day()
         char(' ')
         hour()
@@ -199,7 +199,7 @@ fun AssignmentCard(
     // Some assignments have due time earlier than created time
     val progress = if (durationTotal.isPositive())
         durationElapsed.toDouble(DurationUnit.MINUTES) / durationTotal.toDouble(DurationUnit.MINUTES)
-    else 1
+    else 1.0
 
     Card(modifier = modifier) {
         Column(
@@ -207,56 +207,43 @@ fun AssignmentCard(
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(
-                        text = assignment.name,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-                if (assignment.submissions.any { it.submitted }) {
+                if (assignment.hasSubmittedSubmissions) {
                     Icon(
-                        imageVector = Icons.Default.TaskAlt,
-                        contentDescription = "Status: Completed", // Add content description
-                        modifier = Modifier.padding(start = 8.dp),
-                        tint = MaterialTheme.colorScheme.primary // Use theme color
+                        Icons.Default.Check,
+                        contentDescription = "Submitted",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                } else if (progress < 1.0) {
+                    Icon(
+                        Icons.Default.HourglassTop,
+                        contentDescription = "Unsubmitted",
+                    )
+                } else {
+                    Icon(
+                        Icons.Default.Clear,
+                        contentDescription = "Missing",
+                        tint = MaterialTheme.colorScheme.error
                     )
                 }
-                if (durationRemaining.isPositive()) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.wrapContentWidth()
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.HourglassTop, // Or your preferred hourglass icon
-                            contentDescription = "Time remaining",
-                            modifier = Modifier.size(20.dp),
-                            tint = MaterialTheme.colorScheme.secondary // Use theme color
-                        )
-                        Text(
-                            text = formatDurationLargestTwoUnits(durationRemaining),
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(start = 4.dp)
-                        )
-                    }
-                }
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = assignment.name,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
             }
 
             Spacer(modifier = Modifier.height(8.dp))
-
             LinearWavyProgressIndicator(
                 progress = { progress.toFloat() },
                 modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(8.dp))
-
             Row {
                 Text(
                     createdLocalDateTime.format(format),
@@ -264,7 +251,11 @@ fun AssignmentCard(
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
-                    dueLocalDateTime.format(format),
+                    text = dueLocalDateTime.format(format) +
+                            if (durationRemaining.isPositive())
+                                " (${formatDurationLargestTwoUnits(durationRemaining)})"
+                            else
+                                "",
                     style = MaterialTheme.typography.labelSmall
                 )
             }
@@ -274,9 +265,8 @@ fun AssignmentCard(
 
 @Preview(showBackground = true)
 @Composable
-fun AssignmentScreenPreview() {
-    val coolViewModel: CoolViewModel = viewModel()
-    AssignmentScreen(coolViewModel)
+fun AssignmentCardPreview() {
+    AssignmentCard(fakeAssignment)
 }
 
 fun formatDurationLargestTwoUnits(duration: Duration): String {
