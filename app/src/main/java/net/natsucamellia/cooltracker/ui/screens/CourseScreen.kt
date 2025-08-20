@@ -1,5 +1,6 @@
 package net.natsucamellia.cooltracker.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -21,6 +22,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import net.natsucamellia.cooltracker.model.Course
 
 @Composable
@@ -45,6 +51,38 @@ private fun SuccessScreen(
     modifier: Modifier = Modifier,
     onRefresh: (() -> Unit) -> Unit = {},
 ) {
+    val navController = rememberNavController()
+
+    NavHost(navController, startDestination = "/", modifier = modifier) {
+        composable("/") {
+            CourseListScreen(
+                uiState,
+                onRefresh = onRefresh,
+                onCourseClick = { navController.navigate("/$it") }
+            )
+        }
+        composable(
+            route = "/{courseId}",
+            arguments = listOf(navArgument("courseId") { type = NavType.IntType })
+        ) {
+            val courseId = it.arguments?.getInt("courseId")
+            val course = uiState.courses.find { course -> course.id == courseId }
+            if (course != null) {
+                CourseDetailScreen(course)
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun CourseListScreen(
+    uiState: CoolViewModel.CoolUiState.Success,
+    modifier: Modifier = Modifier,
+    onRefresh: (() -> Unit) -> Unit = {},
+    onCourseClick: (Int) -> Unit = {}
+) {
+
     var isRefreshing by remember { mutableStateOf(false) }
     val refreshState = rememberPullToRefreshState()
 
@@ -62,7 +100,8 @@ private fun SuccessScreen(
                 isRefreshing = isRefreshing,
                 modifier = Modifier.align(Alignment.TopCenter)
             )
-        }
+        },
+        modifier = modifier
     ) {
         Column {
             if (!courses.isEmpty()) {
@@ -74,11 +113,13 @@ private fun SuccessScreen(
                 )
 
                 courses.forEach {
-                    CourseListItem(it)
+                    CourseListItem(
+                        it,
+                        modifier = Modifier.clickable(onClick = { onCourseClick(it.id) })
+                    )
                 }
             }
         }
-
     }
 }
 

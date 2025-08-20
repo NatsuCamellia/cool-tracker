@@ -115,7 +115,7 @@ fun LoggedInScreen(
         Box(modifier = Modifier.padding(innerPadding)) { // Apply innerPadding to content
             when (currentScreen) {
                 NavigationItem.Assignments -> AssignmentScreen(coolViewModel)
-                NavigationItem.Courses -> CourseScreen(co)
+                NavigationItem.Courses -> CourseScreen(coolViewModel)
                 NavigationItem.Grades -> PlaceholderScreen(title = "Grades Screen")   // Placeholder
                 NavigationItem.Account -> AccountScreen(coolViewModel)
             }
