@@ -28,14 +28,6 @@ import net.natsucamellia.cooltracker.ui.screens.WelcomeScreen
 fun COOLTrackerApp(
     coolViewModel: CoolViewModel
 ) {
-    var currentScreen by remember { mutableStateOf<NavigationItem>(NavigationItem.Assignments) }
-    val navigationItems = listOf(
-        NavigationItem.Courses,
-        NavigationItem.Assignments,
-        NavigationItem.Grades,
-        NavigationItem.Account
-    )
-
     when (coolViewModel.coolLoginState) {
         CoolViewModel.CoolLoginState.Init -> {
             InitScreen()
@@ -54,34 +46,9 @@ fun COOLTrackerApp(
         }
 
         CoolViewModel.CoolLoginState.LoggedIn -> {
-            Scaffold(
-                bottomBar = {
-                    NavigationBar {
-                        navigationItems.forEach { screen ->
-                            NavigationBarItem(
-                                icon = {
-                                    Icon(
-                                        if (currentScreen == screen) screen.filledIcon else screen.outlinedIcon,
-                                        contentDescription = screen.title
-                                    )
-                                },
-                                label = { Text(screen.title) },
-                                selected = currentScreen == screen,
-                                onClick = { currentScreen = screen }
-                            )
-                        }
-                    }
-                }
-            ) { innerPadding ->
-                Box(modifier = Modifier.padding(innerPadding)) { // Apply innerPadding to content
-                    when (currentScreen) {
-                        NavigationItem.Assignments -> AssignmentScreen(coolViewModel)
-                        NavigationItem.Courses -> PlaceholderScreen(title = "Courses Screen") // Placeholder
-                        NavigationItem.Grades -> PlaceholderScreen(title = "Grades Screen")   // Placeholder
-                        NavigationItem.Account -> AccountScreen(coolViewModel)
-                    }
-                }
-            }
+            LoggedInScreen(
+                coolViewModel = coolViewModel
+            )
         }
     }
 }
@@ -107,6 +74,50 @@ fun InitScreen(modifier: Modifier = Modifier) {
             contentAlignment = Alignment.Center
         ) {
             LoadingIndicator()
+        }
+    }
+}
+
+@Composable
+fun LoggedInScreen(
+    coolViewModel: CoolViewModel,
+    modifier: Modifier = Modifier
+) {
+    var currentScreen by remember { mutableStateOf<NavigationItem>(NavigationItem.Assignments) }
+    val navigationItems = listOf(
+        NavigationItem.Courses,
+        NavigationItem.Assignments,
+        NavigationItem.Grades,
+        NavigationItem.Account
+    )
+
+    Scaffold(
+        bottomBar = {
+            NavigationBar {
+                navigationItems.forEach { screen ->
+                    NavigationBarItem(
+                        icon = {
+                            Icon(
+                                if (currentScreen == screen) screen.filledIcon else screen.outlinedIcon,
+                                contentDescription = screen.title
+                            )
+                        },
+                        label = { Text(screen.title) },
+                        selected = currentScreen == screen,
+                        onClick = { currentScreen = screen }
+                    )
+                }
+            }
+        },
+        modifier = modifier
+    ) { innerPadding ->
+        Box(modifier = Modifier.padding(innerPadding)) { // Apply innerPadding to content
+            when (currentScreen) {
+                NavigationItem.Assignments -> AssignmentScreen(coolViewModel)
+                NavigationItem.Courses -> PlaceholderScreen(title = "Courses Screen") // Placeholder
+                NavigationItem.Grades -> PlaceholderScreen(title = "Grades Screen")   // Placeholder
+                NavigationItem.Account -> AccountScreen(coolViewModel)
+            }
         }
     }
 }
