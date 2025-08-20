@@ -1,11 +1,13 @@
 package net.natsucamellia.cooltracker.ui
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LoadingIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -54,16 +56,6 @@ fun COOLTrackerApp(
     }
 }
 
-@Composable
-fun PlaceholderScreen(title: String) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(text = "This is the $title")
-    }
-}
-
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun InitScreen(modifier: Modifier = Modifier) {
@@ -88,10 +80,8 @@ fun LoggedInScreen(
     val navigationItems = listOf(
         NavigationItem.Courses,
         NavigationItem.Assignments,
-        NavigationItem.Grades,
         NavigationItem.Account
     )
-
     Scaffold(
         bottomBar = {
             NavigationBar {
@@ -110,13 +100,17 @@ fun LoggedInScreen(
                 }
             }
         },
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         modifier = modifier
     ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding)) { // Apply innerPadding to content
+        Box(
+            modifier = Modifier
+                .padding(innerPadding)
+                .consumeWindowInsets(innerPadding)
+        ) { // Apply innerPadding to content
             when (currentScreen) {
                 NavigationItem.Assignments -> AssignmentScreen(coolViewModel)
                 NavigationItem.Courses -> CourseScreen(coolViewModel)
-                NavigationItem.Grades -> PlaceholderScreen(title = "Grades Screen")   // Placeholder
                 NavigationItem.Account -> AccountScreen(coolViewModel)
             }
         }
