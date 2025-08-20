@@ -17,8 +17,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
-import net.natsucamellia.cooltracker.CoolApplication
 import net.natsucamellia.cooltracker.nav.NavigationItem
 import net.natsucamellia.cooltracker.ui.screens.AccountScreen
 import net.natsucamellia.cooltracker.ui.screens.AssignmentScreen
@@ -28,9 +26,8 @@ import net.natsucamellia.cooltracker.ui.screens.WelcomeScreen
 
 @Composable
 fun COOLTrackerApp(
-    coolApplication: CoolApplication
+    coolViewModel: CoolViewModel
 ) {
-    val coolViewModel: CoolViewModel = viewModel(factory = CoolViewModel.Factory)
     var currentScreen by remember { mutableStateOf<NavigationItem>(NavigationItem.Assignments) }
     val navigationItems = listOf(
         NavigationItem.Courses,
@@ -43,19 +40,19 @@ fun COOLTrackerApp(
         CoolViewModel.CoolLoginState.Init -> {
             InitScreen()
         }
+
         CoolViewModel.CoolLoginState.LoggedOut -> {
             WelcomeScreen(
-                onLogin = {
-                    coolViewModel.coolLoginState = CoolViewModel.CoolLoginState.LoggingIn
-                }
+                onLogin = coolViewModel::onLogin
             )
         }
+
         CoolViewModel.CoolLoginState.LoggingIn -> {
-            LoginWebViewScreen { cookies ->
-                coolApplication.container.coolRepository.saveUserSessionCookies(cookies)
-                coolViewModel.coolLoginState = CoolViewModel.CoolLoginState.LoggedIn
-            }
+            LoginWebViewScreen(
+                onLoginSuccess = coolViewModel::onLoggedIn
+            )
         }
+
         CoolViewModel.CoolLoginState.LoggedIn -> {
             Scaffold(
                 bottomBar = {
@@ -104,7 +101,8 @@ fun PlaceholderScreen(title: String) {
 fun InitScreen(modifier: Modifier = Modifier) {
     Scaffold(modifier = modifier) { innerPadding ->
         Box(
-            modifier = modifier.fillMaxSize()
+            modifier = modifier
+                .fillMaxSize()
                 .padding(innerPadding),
             contentAlignment = Alignment.Center
         ) {

@@ -55,7 +55,7 @@ fun AssignmentScreen(
     coolViewModel.coolUiState.collectAsState().value.let { coolUiState ->
         when (coolUiState) {
             is CoolViewModel.CoolUiState.Error -> ErrorScreen { coolViewModel.loadCourses() }
-            is CoolViewModel.CoolUiState.Loading -> LoadingScreen { coolViewModel.loadCourses() }
+            is CoolViewModel.CoolUiState.Loading -> LoadingScreen()
             is CoolViewModel.CoolUiState.Success -> SuccessScreen(coolUiState) { onDone ->
                 coolViewModel.loadCourses(onDone = onDone)
             }

@@ -31,7 +31,7 @@ fun AccountScreen(
     coolViewModel.accountUiState.collectAsState().value.let { accountUiState ->
         when (accountUiState) {
             is CoolViewModel.AccountUiState.Error -> ErrorScreen { coolViewModel.loadUserProfile() }
-            is CoolViewModel.AccountUiState.Loading -> LoadingScreen { coolViewModel.loadUserProfile() }
+            is CoolViewModel.AccountUiState.Loading -> LoadingScreen()
             is CoolViewModel.AccountUiState.Success -> SuccessScreen(coolViewModel, accountUiState)
         }
     }

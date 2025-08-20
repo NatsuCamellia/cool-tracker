@@ -5,15 +5,18 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import net.natsucamellia.cooltracker.ui.COOLTrackerApp
+import net.natsucamellia.cooltracker.ui.screens.CoolViewModel
 import net.natsucamellia.cooltracker.ui.theme.COOLTrackerTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        val coolViewModel = CoolViewModel((application as CoolApplication).container.coolRepository)
         setContent {
             COOLTrackerTheme {
-                COOLTrackerApp(application as CoolApplication)
+                COOLTrackerApp(coolViewModel)
             }
         }
     }

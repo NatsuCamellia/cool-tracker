@@ -4,15 +4,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import net.natsucamellia.cooltracker.CoolApplication
 import net.natsucamellia.cooltracker.data.CoolRepository
 import net.natsucamellia.cooltracker.model.Course
 import net.natsucamellia.cooltracker.model.Profile
@@ -20,7 +15,8 @@ import net.natsucamellia.cooltracker.model.Profile
 class CoolViewModel(
     private val coolRepository: CoolRepository
 ) : ViewModel() {
-    var coolLoginState by mutableStateOf<CoolLoginState>(CoolLoginState.Init)
+    var coolLoginState: CoolLoginState by mutableStateOf(CoolLoginState.Init)
+        private set
     private val _coolUiState = MutableStateFlow<CoolUiState>(CoolUiState.Loading)
     val coolUiState = _coolUiState.asStateFlow()
     private val _accountUiState = MutableStateFlow<AccountUiState>(AccountUiState.Loading)
@@ -33,6 +29,10 @@ class CoolViewModel(
                 CoolLoginState.LoggedIn
             } else {
                 CoolLoginState.LoggedOut
+            }
+
+            if (coolLoginState == CoolLoginState.LoggedIn) {
+                postLogin()
             }
         }
     }
@@ -75,19 +75,24 @@ class CoolViewModel(
         }
     }
 
+    fun onLogin() {
+        coolLoginState = CoolLoginState.LoggingIn
+    }
+
+    fun onLoggedIn(cookies: String) {
+        coolRepository.saveUserSessionCookies(cookies)
+        coolLoginState = CoolLoginState.LoggedIn
+        postLogin()
+    }
+
+    private fun postLogin() {
+        loadCourses()
+        loadUserProfile()
+    }
+
     fun logout() {
         coolRepository.clearUserSessionCookies()
         coolLoginState = CoolLoginState.LoggedOut
-    }
-
-    companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                val application = (this[APPLICATION_KEY] as CoolApplication)
-                val coolRepository = application.container.coolRepository
-                CoolViewModel(coolRepository)
-            }
-        }
     }
 
     sealed interface CoolLoginState {
