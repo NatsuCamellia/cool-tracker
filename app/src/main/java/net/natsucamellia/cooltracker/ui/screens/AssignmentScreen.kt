@@ -68,13 +68,14 @@ fun AssignmentScreen(
     ExperimentalTime::class
 )
 @Composable
-fun SuccessScreen(
+private fun SuccessScreen(
     uiState: CoolViewModel.CoolUiState.Success,
     modifier: Modifier = Modifier,
     onRefresh: (() -> Unit) -> Unit = {},
 ) {
     var isRefreshing by remember { mutableStateOf(false) }
     val refreshState = rememberPullToRefreshState()
+    val courses = uiState.courses
     PullToRefreshBox(
         isRefreshing = isRefreshing,
         onRefresh = {
@@ -102,8 +103,8 @@ fun SuccessScreen(
                 fontWeight = FontWeight.Bold
             )
 
-            if (uiState.courses.any { course -> course.assignments.any { it.dueTime > Clock.System.now() } }) {
-                uiState.courses.forEach {
+            if (courses.any { course -> course.assignments.any { it.dueTime > Clock.System.now() } }) {
+                courses.forEach {
                     CourseCard(
                         course = it,
                         onGoing = true,
@@ -124,8 +125,8 @@ fun SuccessScreen(
                 style = MaterialTheme.typography.displaySmall,
                 fontWeight = FontWeight.Bold
             )
-            if (uiState.courses.any { course -> course.assignments.any { it.dueTime <= Clock.System.now() } }) {
-                uiState.courses.forEach {
+            if (courses.any { course -> course.assignments.any { it.dueTime <= Clock.System.now() } }) {
+                courses.forEach {
                     CourseCard(
                         course = it,
                         onGoing = false,
@@ -145,7 +146,7 @@ fun SuccessScreen(
 
 @OptIn(ExperimentalTime::class)
 @Composable
-fun CourseCard(
+private fun CourseCard(
     course: Course,
     modifier: Modifier = Modifier,
     onGoing: Boolean? = null
@@ -163,7 +164,6 @@ fun CourseCard(
             Text(
                 course.name.replaceFirst(' ', '\n'),
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(16.dp))
             assignments.forEach {

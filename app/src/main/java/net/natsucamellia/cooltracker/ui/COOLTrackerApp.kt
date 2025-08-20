@@ -21,6 +21,7 @@ import net.natsucamellia.cooltracker.nav.NavigationItem
 import net.natsucamellia.cooltracker.ui.screens.AccountScreen
 import net.natsucamellia.cooltracker.ui.screens.AssignmentScreen
 import net.natsucamellia.cooltracker.ui.screens.CoolViewModel
+import net.natsucamellia.cooltracker.ui.screens.CourseScreen
 import net.natsucamellia.cooltracker.ui.screens.LoginWebViewScreen
 import net.natsucamellia.cooltracker.ui.screens.WelcomeScreen
 
@@ -114,7 +115,7 @@ fun LoggedInScreen(
         Box(modifier = Modifier.padding(innerPadding)) { // Apply innerPadding to content
             when (currentScreen) {
                 NavigationItem.Assignments -> AssignmentScreen(coolViewModel)
-                NavigationItem.Courses -> PlaceholderScreen(title = "Courses Screen") // Placeholder
+                NavigationItem.Courses -> CourseScreen(co)
                 NavigationItem.Grades -> PlaceholderScreen(title = "Grades Screen")   // Placeholder
                 NavigationItem.Account -> AccountScreen(coolViewModel)
             }

@@ -107,6 +107,7 @@ class NetworkCoolRepository(
                             Course(
                                 id = it.id,
                                 name = it.name,
+                                isPublic = it.isPublic,
                                 courseCode = it.courseCode,
                                 assignments = assignments
                             )
