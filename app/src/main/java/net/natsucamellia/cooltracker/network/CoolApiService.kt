@@ -11,12 +11,12 @@ interface CoolApiService {
         @Header("Cookie") cookies: String?
     ): Response<ProfileDTO>
 
-    @GET("courses?enrollment_state=active")
+    @GET("courses?enrollment_state=active&per_page=100")
     suspend fun getActiveCourses(
         @Header("Cookie") cookies: String?
     ): Response<List<CourseDTO>>
 
-    @GET("courses/{courseId}/assignments")
+    @GET("courses/{courseId}/assignments?per_page=100")
     suspend fun getCourseAssignments(
         @Header("Cookie") cookies: String?,
         @Path("courseId") courseId: Int
