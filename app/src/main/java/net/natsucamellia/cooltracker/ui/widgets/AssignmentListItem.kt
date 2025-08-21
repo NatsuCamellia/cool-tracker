@@ -72,7 +72,7 @@ fun AssignmentListItem(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    if (assignment.hasSubmittedSubmissions) {
+                    if (assignment.submitted) {
                         Icon(
                             Icons.Default.Check,
                             contentDescription = "Submitted",

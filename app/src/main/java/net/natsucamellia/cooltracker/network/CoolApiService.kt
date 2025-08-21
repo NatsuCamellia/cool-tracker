@@ -16,7 +16,7 @@ interface CoolApiService {
         @Header("Cookie") cookies: String?
     ): Response<List<CourseDTO>>
 
-    @GET("courses/{courseId}/assignments?per_page=100")
+    @GET("courses/{courseId}/assignments?per_page=100&include[]=submission")
     suspend fun getCourseAssignments(
         @Header("Cookie") cookies: String?,
         @Path("courseId") courseId: Int

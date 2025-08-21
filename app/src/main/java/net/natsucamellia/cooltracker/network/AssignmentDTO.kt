@@ -11,6 +11,11 @@ data class AssignmentDTO(
     @SerializedName("created_at")
     val createdAt: String,
     val name: String,
-    @SerializedName("has_submitted_submissions")
-    val hasSubmittedSubmissions: Boolean
+    val submission: SubmissionDTO
+)
+
+data class SubmissionDTO(
+    val id: Int,
+    @SerializedName("workflow_state")
+    val workflowState: String
 )

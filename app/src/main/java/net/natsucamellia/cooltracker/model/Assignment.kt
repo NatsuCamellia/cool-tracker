@@ -11,7 +11,7 @@ data class Assignment(
     val pointsPossible: Double,
     val createdTime: Instant,
     val name: String,
-    val hasSubmittedSubmissions: Boolean
+    val submitted: Boolean
 )
 
 @OptIn(ExperimentalTime::class)
@@ -21,5 +21,5 @@ val fakeAssignment: Assignment = Assignment(
     pointsPossible = 110.0,
     createdTime = Instant.parse("2025-05-14T06:10:50Z"),
     name = "Final Project",
-    hasSubmittedSubmissions = true
+    submitted = true
 )
