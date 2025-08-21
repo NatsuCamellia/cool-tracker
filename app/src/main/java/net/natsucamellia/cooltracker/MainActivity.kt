@@ -13,6 +13,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        // Since the viewmodel need a context to make intents, we pass the application and it's
+        // context to the viewmodel. This won't cause any memory leaks because the viewmodel
+        // will be destroyed when the activity is destroyed.
         val coolViewModel = CoolViewModel(application)
         setContent {
             COOLTrackerTheme {

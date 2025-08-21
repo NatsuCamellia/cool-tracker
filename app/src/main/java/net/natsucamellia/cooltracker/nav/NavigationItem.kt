@@ -9,7 +9,13 @@ import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.School
 import androidx.compose.ui.graphics.vector.ImageVector
 
-sealed class NavigationItem(val filledIcon: ImageVector, val outlinedIcon: ImageVector, val title: String) {
+sealed class NavigationItem(
+    /** The icon to show when the item is selected */
+    val filledIcon: ImageVector,
+    /** The icon to show when the item is not selected */
+    val outlinedIcon: ImageVector,
+    val title: String
+) {
     data object Courses : NavigationItem(Icons.Filled.School,
         Icons.Outlined.School, "Courses")
     data object Assignments : NavigationItem(Icons.AutoMirrored.Filled.Assignment,

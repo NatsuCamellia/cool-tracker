@@ -62,6 +62,7 @@ fun SuccessScreen(
             verticalArrangement = Arrangement.spacedBy(2.dp),
             modifier = Modifier.clip(ClipShapes.outerRoundedCornerShape)
         ) {
+            // Name and avatar
             ListItem(
                 headlineContent = { Text("Name") },
                 supportingContent = { Text(profile.name) },
@@ -82,6 +83,7 @@ fun SuccessScreen(
                     .clip(ClipShapes.innerRoundedCornerShape)
                     .clickable(onClick = {})
             )
+            // ID
             ListItem(
                 headlineContent = { Text("ID") },
                 supportingContent = { Text("${profile.id}") },
@@ -89,6 +91,7 @@ fun SuccessScreen(
                     .clip(ClipShapes.innerRoundedCornerShape)
                     .clickable(onClick = {})
             )
+            // Email
             ListItem(
                 headlineContent = { Text("Email") },
                 supportingContent = { Text(profile.primaryEmail) },
@@ -96,6 +99,7 @@ fun SuccessScreen(
                     .clip(ClipShapes.innerRoundedCornerShape)
                     .clickable(onClick = {})
             )
+            // Bio
             ListItem(
                 headlineContent = { Text("Bio") },
                 supportingContent = { Text(profile.bio ?: "You don't have a bio yet.") },
@@ -103,6 +107,7 @@ fun SuccessScreen(
                     .clip(ClipShapes.innerRoundedCornerShape)
                     .clickable(onClick = {})
             )
+            // Logout
             ListItem(
                 headlineContent = {
                     Text(
@@ -117,7 +122,7 @@ fun SuccessScreen(
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-        // About
+        // About the app
         SectionLabel(
             text = "About",
             modifier = Modifier.padding(horizontal = 8.dp)
@@ -127,6 +132,7 @@ fun SuccessScreen(
             verticalArrangement = Arrangement.spacedBy(2.dp),
             modifier = Modifier.clip(ClipShapes.outerRoundedCornerShape)
         ) {
+            // Source Code
             ListItem(
                 headlineContent = { Text("Source Code") },
                 supportingContent = { Text("Check the source code on GitHub") },
@@ -134,9 +140,10 @@ fun SuccessScreen(
                     .clip(ClipShapes.innerRoundedCornerShape)
                     .clickable(onClick = { coolViewModel.openUrl("https://github.com/natsucamellia/cool-tracker") })
             )
+            // Version
             ListItem(
                 headlineContent = { Text("Version") },
-                supportingContent = { Text("0.1") },
+                supportingContent = { Text(coolViewModel.getAppVersion()) },
                 modifier = modifier
                     .clip(ClipShapes.innerRoundedCornerShape)
                     .clickable(onClick = {})

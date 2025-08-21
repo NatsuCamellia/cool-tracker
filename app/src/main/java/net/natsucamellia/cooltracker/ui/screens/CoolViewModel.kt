@@ -20,6 +20,9 @@ class CoolViewModel(
     private val application: Application
 ) : ViewModel() {
     private val coolRepository = (application as CoolApplication).container.coolRepository
+
+    // There is not specific reason to choose Compose state or StateFlow, the following states
+    // are chosen at random. They can be changed if needed.
     var coolLoginState: CoolLoginState by mutableStateOf(CoolLoginState.Init)
         private set
     private val _coolUiState = MutableStateFlow<CoolUiState>(CoolUiState.Loading)
@@ -42,11 +45,14 @@ class CoolViewModel(
         }
     }
 
+    /**
+     * Load the courses from repository and calls [onDone] when done.
+     */
     fun loadCourses(
         onDone: () -> Unit = {}
     ) {
         if (_coolUiState.value is CoolUiState.Error) {
-            // Retry
+            // Since there is no data to be shown, set to Loading.
             _coolUiState.value = CoolUiState.Loading
         }
 
@@ -61,11 +67,14 @@ class CoolViewModel(
         }
     }
 
+    /**
+     * Load the current user's profile from repository and calls [onDone] when done.
+     */
     fun loadUserProfile(
         onDone: () -> Unit = {}
     ) {
         if (_accountUiState.value is AccountUiState.Error) {
-            // Retry
+            // Since there is no data to be shown, set to Loading.
             _accountUiState.value = AccountUiState.Loading
         }
 
@@ -80,42 +89,78 @@ class CoolViewModel(
         }
     }
 
-    fun onLogin() {
+    /**
+     * Handle the login button click.
+     */
+    fun onLoginClicked() {
         coolLoginState = CoolLoginState.LoggingIn
     }
 
-    fun onLoggedIn(cookies: String) {
+    /**
+     * Login to NTU COOL with the given [cookies].
+     */
+    fun login(cookies: String) {
+        // TODO: Check if the cookies are valid
         coolRepository.saveUserSessionCookies(cookies)
         coolLoginState = CoolLoginState.LoggedIn
         postLogin()
     }
 
+    /**
+     * Do necessary works after login.
+     */
     private fun postLogin() {
         loadCourses()
         loadUserProfile()
     }
 
+    /**
+     * Logout from NTU COOL.
+     */
     fun logout() {
+        // Clear the cookies from repository, since it's expected not to automatically login when
+        // the app is started again. Also the user's intention is to clear the session, which is
+        // the reason the user try to logout.
         coolRepository.clearUserSessionCookies()
         coolLoginState = CoolLoginState.LoggedOut
     }
 
+    /**
+     * Open the given [url] in the external browser.
+     */
     fun openUrl(url: String) {
         val intent = Intent(Intent.ACTION_VIEW, url.toUri())
         intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
         application.applicationContext.startActivity(intent)
     }
 
+    fun getAppVersion(): String {
+        val packageInfo = application.packageManager.getPackageInfo(application.packageName, 0)
+        return "${packageInfo.versionName} (${packageInfo.longVersionCode})"
+    }
+
     sealed interface CoolLoginState {
+        /** Waiting the viewmodel to initialize */
         data object Init : CoolLoginState
         data object LoggedIn : CoolLoginState
         data object LoggedOut : CoolLoginState
+
+        /** Waiting the user to login into NTU COOL in the WebView */
         data object LoggingIn : CoolLoginState
     }
 
     sealed interface CoolUiState {
+        /**
+         * There is data ready to be shown.
+         * When refreshing, the state should be in [Success] since the data is already loaded.
+         */
         data class Success(val courses: List<Course>) : CoolUiState
         data object Error : CoolUiState
+
+        /**
+         * Waiting the data to be loaded first time.
+         * When refreshing, the state should be in [Success] since the data is already loaded.
+         */
         data object Loading : CoolUiState
     }
 

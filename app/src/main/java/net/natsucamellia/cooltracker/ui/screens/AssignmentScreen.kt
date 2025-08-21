@@ -75,6 +75,7 @@ private fun SuccessScreen(
         },
         modifier = modifier
     ) {
+        // We use LazyColumn because the number of assignments of all courses may be large.
         LazyColumn(
             modifier = Modifier
                 .padding(horizontal = 16.dp)
@@ -119,6 +120,7 @@ private fun CourseCard(
     modifier: Modifier = Modifier,
     onGoing: Boolean? = null
 ) {
+    // Filter assignment based on onGoing
     val assignments = course.assignments.filter {
         when (onGoing) {
             true -> it.dueTime > Clock.System.now()
@@ -129,6 +131,7 @@ private fun CourseCard(
 
     if (assignments.isNotEmpty()) {
         Column(modifier = modifier) {
+            // Chinese name and english name
             Text(
                 course.chineseName,
                 style = MaterialTheme.typography.titleMedium,
@@ -143,7 +146,9 @@ private fun CourseCard(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.padding(horizontal = 8.dp)
             )
+
             Spacer(modifier = Modifier.height(8.dp))
+            // Assignment list
             Column(modifier = Modifier.clip(ClipShapes.outerRoundedCornerShape)) {
                 assignments.forEach { assignment ->
                     AssignmentListItem(

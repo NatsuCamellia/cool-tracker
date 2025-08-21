@@ -64,19 +64,22 @@ private fun SuccessScreen(
     val navController = rememberNavController()
 
     NavHost(navController, startDestination = "/", modifier = modifier) {
+        // Show the course list
         composable("/") {
             CourseListScreen(
-                uiState = uiState,
+                courses = uiState.courses,
                 onRefresh = onRefresh,
                 onCourseClick = { navController.navigate("/$it") }
             )
         }
+        // Show the assignment list of a course
         composable(
             route = "/{courseId}",
             arguments = listOf(navArgument("courseId") { type = NavType.IntType })
         ) {
             val courseId = it.arguments?.getInt("courseId")
             val course = uiState.courses.find { course -> course.id == courseId }
+            // Ideally this should never be null
             if (course != null) {
                 CourseDetailScreen(
                     course = course,
@@ -90,7 +93,7 @@ private fun SuccessScreen(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun CourseListScreen(
-    uiState: CoolViewModel.CoolUiState.Success,
+    courses: List<Course>,
     modifier: Modifier = Modifier,
     onRefresh: (() -> Unit) -> Unit = {},
     onCourseClick: (Int) -> Unit = {}
@@ -98,7 +101,6 @@ private fun CourseListScreen(
     var isRefreshing by remember { mutableStateOf(false) }
     val refreshState = rememberPullToRefreshState()
 
-    val courses = uiState.courses
     PullToRefreshBox(
         isRefreshing = isRefreshing,
         onRefresh = {
@@ -120,6 +122,7 @@ private fun CourseListScreen(
                 .padding(horizontal = 16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
+            // Currently, this app only shows ongoing courses.
             SectionLabel(
                 text = "Ongoing",
                 modifier = Modifier.padding(horizontal = 8.dp)

@@ -74,9 +74,9 @@ fun CourseDetailScreen(
             .nestedScroll(scrollBehavior.nestedScrollConnection)
     ) { innerPadding ->
         Column(
-            modifier = Modifier
-                .verticalScroll(rememberScrollState())
+            modifier = Modifier.verticalScroll(rememberScrollState())
         ) {
+            // Padding for the app bar
             Spacer(Modifier.height(16.dp))
             Column(
                 modifier = modifier

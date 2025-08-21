@@ -16,8 +16,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
+/**
+ * Show an error message and a retry button to the user.
+ * [onRetry] will be called when the user clicks the retry button.
+ */
 @Composable
 fun ErrorScreen(
     modifier: Modifier = Modifier,
@@ -44,4 +49,10 @@ fun ErrorScreen(
             Text("Retry")
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ErrorScreenPreview() {
+    ErrorScreen()
 }

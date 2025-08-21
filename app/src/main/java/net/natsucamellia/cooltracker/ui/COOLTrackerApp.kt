@@ -38,13 +38,13 @@ fun COOLTrackerApp(
 
         CoolViewModel.CoolLoginState.LoggedOut -> {
             WelcomeScreen(
-                onLogin = coolViewModel::onLogin
+                onLogin = coolViewModel::onLoginClicked
             )
         }
 
         CoolViewModel.CoolLoginState.LoggingIn -> {
             LoginWebViewScreen(
-                onLoginSuccess = coolViewModel::onLoggedIn
+                onLoginSuccess = coolViewModel::login
             )
         }
 
