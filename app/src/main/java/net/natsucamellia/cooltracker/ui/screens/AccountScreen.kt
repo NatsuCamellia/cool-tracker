@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
@@ -20,9 +19,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import net.natsucamellia.cooltracker.ui.theme.ClipShapes
+import net.natsucamellia.cooltracker.ui.widgets.SectionLabel
 
 @Composable
 fun AccountScreen(
@@ -53,16 +53,14 @@ fun SuccessScreen(
             .verticalScroll(rememberScrollState())
     ) {
         // Account
-        Text(
-            "Account",
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary,
+        SectionLabel(
+            text = "Account",
             modifier = Modifier.padding(horizontal = 8.dp)
         )
         Spacer(Modifier.height(8.dp))
         Column(
             verticalArrangement = Arrangement.spacedBy(2.dp),
+            modifier = Modifier.clip(ClipShapes.outerRoundedCornerShape)
         ) {
             ListItem(
                 headlineContent = { Text("Name") },
@@ -81,35 +79,28 @@ fun SuccessScreen(
                     )
                 },
                 modifier = modifier
-                    .clip(
-                        RoundedCornerShape(
-                            topStart = 24.dp,
-                            topEnd = 24.dp,
-                            bottomStart = 8.dp,
-                            bottomEnd = 8.dp
-                        )
-                    )
+                    .clip(ClipShapes.innerRoundedCornerShape)
                     .clickable(onClick = {})
             )
             ListItem(
                 headlineContent = { Text("ID") },
                 supportingContent = { Text("${profile.id}") },
                 modifier = modifier
-                    .clip(RoundedCornerShape(8.dp))
+                    .clip(ClipShapes.innerRoundedCornerShape)
                     .clickable(onClick = {})
             )
             ListItem(
                 headlineContent = { Text("Email") },
                 supportingContent = { Text(profile.primaryEmail) },
                 modifier = modifier
-                    .clip(RoundedCornerShape(8.dp))
+                    .clip(ClipShapes.innerRoundedCornerShape)
                     .clickable(onClick = {})
             )
             ListItem(
                 headlineContent = { Text("Bio") },
                 supportingContent = { Text(profile.bio ?: "You don't have a bio yet.") },
                 modifier = modifier
-                    .clip(RoundedCornerShape(8.dp))
+                    .clip(ClipShapes.innerRoundedCornerShape)
                     .clickable(onClick = {})
             )
             ListItem(
@@ -120,47 +111,34 @@ fun SuccessScreen(
                     )
                 },
                 modifier = modifier
-                    .clip(
-                        RoundedCornerShape(
-                            topStart = 8.dp,
-                            topEnd = 8.dp,
-                            bottomStart = 24.dp,
-                            bottomEnd = 24.dp
-                        )
-                    )
+                    .clip(ClipShapes.innerRoundedCornerShape)
                     .clickable(onClick = coolViewModel::logout)
             )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
         // About
-        Text(
-            "About",
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary,
+        SectionLabel(
+            text = "About",
             modifier = Modifier.padding(horizontal = 8.dp)
         )
         Spacer(Modifier.height(8.dp))
         Column(
             verticalArrangement = Arrangement.spacedBy(2.dp),
+            modifier = Modifier.clip(ClipShapes.outerRoundedCornerShape)
         ) {
             ListItem(
                 headlineContent = { Text("Source Code") },
                 supportingContent = { Text("Check the source code on GitHub") },
                 modifier = modifier
-                    .clip(
-                        RoundedCornerShape(24, 24, 8, 8)
-                    )
+                    .clip(ClipShapes.innerRoundedCornerShape)
                     .clickable(onClick = { coolViewModel.openUrl("https://github.com/natsucamellia/cool-tracker") })
             )
             ListItem(
                 headlineContent = { Text("Version") },
                 supportingContent = { Text("0.1") },
                 modifier = modifier
-                    .clip(
-                        RoundedCornerShape(8, 8, 24, 24)
-                    )
+                    .clip(ClipShapes.innerRoundedCornerShape)
                     .clickable(onClick = {})
             )
         }

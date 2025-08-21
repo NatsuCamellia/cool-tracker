@@ -4,9 +4,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -22,10 +21,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import net.natsucamellia.cooltracker.model.Course
+import net.natsucamellia.cooltracker.model.chineseName
+import net.natsucamellia.cooltracker.model.englishName
+import net.natsucamellia.cooltracker.ui.theme.ClipShapes
 import net.natsucamellia.cooltracker.ui.widgets.AssignmentListItem
+import net.natsucamellia.cooltracker.ui.widgets.SectionLabel
 import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
@@ -72,18 +75,17 @@ private fun SuccessScreen(
         },
         modifier = modifier
     ) {
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .padding(horizontal = 16.dp)
-                .verticalScroll(rememberScrollState())
         ) {
-            Text(
-                "Ongoing",
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
-            )
-            courses.forEach {
+            item {
+                SectionLabel(
+                    text = "Ongoing",
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
+            }
+            items(courses) {
                 CourseCard(
                     course = it,
                     onGoing = true,
@@ -91,14 +93,14 @@ private fun SuccessScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
-            Text(
-                "Closed",
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
-            )
-            courses.forEach {
+            item {
+                Spacer(modifier = Modifier.height(32.dp))
+                SectionLabel(
+                    text = "Closed",
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
+            }
+            items(courses) {
                 CourseCard(
                     course = it,
                     onGoing = false,
@@ -128,34 +130,29 @@ private fun CourseCard(
     if (assignments.isNotEmpty()) {
         Column(modifier = modifier) {
             Text(
-                course.name.replaceFirst(' ', '\n'),
+                course.chineseName,
                 style = MaterialTheme.typography.titleMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(horizontal = 8.dp)
             )
-            Spacer(modifier = Modifier.height(16.dp))
-            assignments.forEachIndexed { index, assignment ->
-                val shape = when (index) {
-                    0 -> RoundedCornerShape(
-                        topStart = 24.dp,
-                        topEnd = 24.dp,
-                        bottomStart = 8.dp,
-                        bottomEnd = 8.dp
+            Text(
+                course.englishName,
+                style = MaterialTheme.typography.labelLarge,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(horizontal = 8.dp)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Column(modifier = Modifier.clip(ClipShapes.outerRoundedCornerShape)) {
+                assignments.forEach { assignment ->
+                    AssignmentListItem(
+                        assignment = assignment,
+                        Modifier
+                            .padding(vertical = 1.dp)
+                            .clip(ClipShapes.innerRoundedCornerShape)
                     )
-
-                    course.assignments.lastIndex -> RoundedCornerShape(
-                        topStart = 8.dp,
-                        topEnd = 8.dp,
-                        bottomStart = 24.dp,
-                        bottomEnd = 24.dp
-                    )
-
-                    else -> RoundedCornerShape(8.dp)
                 }
-                AssignmentListItem(
-                    assignment = assignment,
-                    Modifier
-                        .padding(vertical = 1.dp)
-                        .clip(shape)
-                )
             }
         }
     }

@@ -1,18 +1,16 @@
 package net.natsucamellia.cooltracker.ui.screens
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.LoadingIndicator
@@ -34,6 +32,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import net.natsucamellia.cooltracker.model.Course
+import net.natsucamellia.cooltracker.model.chineseName
+import net.natsucamellia.cooltracker.model.englishName
+import net.natsucamellia.cooltracker.ui.theme.ClipShapes
+import net.natsucamellia.cooltracker.ui.widgets.SectionLabel
 
 @Composable
 fun CourseScreen(
@@ -112,29 +114,30 @@ private fun CourseListScreen(
             )
         },
         modifier = modifier
-            .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
     ) {
-        Surface(
-            color = MaterialTheme.colorScheme.background,
+        Column(
             modifier = Modifier
-                .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                .fillMaxHeight()
+                .padding(horizontal = 16.dp)
+                .verticalScroll(rememberScrollState())
         ) {
+            SectionLabel(
+                text = "Ongoing",
+                modifier = Modifier.padding(horizontal = 8.dp)
+            )
+            Spacer(Modifier.height(8.dp))
             Column(
+                verticalArrangement = Arrangement.spacedBy(2.dp),
                 modifier = Modifier
-                    .verticalScroll(rememberScrollState())
+                    .clip(ClipShapes.outerRoundedCornerShape)
             ) {
-                Spacer(modifier = Modifier.height(8.dp))
-                if (!courses.isEmpty()) {
-                    courses.forEach {
-                        CourseListItem(
-                            course = it,
-                            modifier = Modifier
-                                .clickable(
-                                    onClick = { onCourseClick(it.id) }
-                                )
-                        )
-                    }
+                courses.forEach {
+                    CourseListItem(
+                        course = it,
+                        modifier = Modifier
+                            .clickable(
+                                onClick = { onCourseClick(it.id) }
+                            )
+                    )
                 }
             }
         }
@@ -149,10 +152,16 @@ private fun CourseListItem(
     ListItem(
         headlineContent = {
             Text(
-                text = course.name.replaceFirst(' ', '\n'),
-                maxLines = 2,
+                text = course.chineseName,
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.titleMedium
+            )
+        },
+        supportingContent = {
+            Text(
+                text = course.englishName,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
         },
         modifier = modifier

@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -20,7 +19,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.datetime.LocalDateTime
@@ -65,9 +63,7 @@ fun AssignmentListItem(
     ListItem(
         modifier = modifier,
         headlineContent = {
-            Column(
-                modifier = Modifier.padding(vertical = 8.dp)
-            ) {
+            Column {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
@@ -93,8 +89,6 @@ fun AssignmentListItem(
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = assignment.name,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.SemiBold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -107,21 +101,25 @@ fun AssignmentListItem(
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
-                Row {
-                    Text(
-                        createdLocalDateTime.format(format),
-                        style = MaterialTheme.typography.labelSmall
-                    )
-                    Spacer(modifier = Modifier.weight(1f))
-                    Text(
-                        text = dueLocalDateTime.format(format) +
-                                if (durationRemaining.isPositive())
-                                    " (${formatDurationLargestTwoUnits(durationRemaining)})"
-                                else
-                                    "",
-                        style = MaterialTheme.typography.labelSmall
-                    )
-                }
+
             }
-        })
+        },
+        supportingContent = {
+            Row {
+                Text(
+                    createdLocalDateTime.format(format),
+                    style = MaterialTheme.typography.labelSmall,
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Text(
+                    text = dueLocalDateTime.format(format) +
+                            if (durationRemaining.isPositive())
+                                " (${formatDurationLargestTwoUnits(durationRemaining)})"
+                            else
+                                "",
+                    style = MaterialTheme.typography.labelSmall
+                )
+            }
+        }
+    )
 }
