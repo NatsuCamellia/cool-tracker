@@ -1,20 +1,25 @@
 package net.natsucamellia.cooltracker.ui.screens
 
+import android.app.Application
+import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import net.natsucamellia.cooltracker.data.CoolRepository
+import net.natsucamellia.cooltracker.CoolApplication
 import net.natsucamellia.cooltracker.model.Course
 import net.natsucamellia.cooltracker.model.Profile
 
 class CoolViewModel(
-    private val coolRepository: CoolRepository
+    private val application: Application
 ) : ViewModel() {
+    private val coolRepository = (application as CoolApplication).container.coolRepository
     var coolLoginState: CoolLoginState by mutableStateOf(CoolLoginState.Init)
         private set
     private val _coolUiState = MutableStateFlow<CoolUiState>(CoolUiState.Loading)
@@ -93,6 +98,12 @@ class CoolViewModel(
     fun logout() {
         coolRepository.clearUserSessionCookies()
         coolLoginState = CoolLoginState.LoggedOut
+    }
+
+    fun openUrl(url: String) {
+        val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+        intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
+        application.applicationContext.startActivity(intent)
     }
 
     sealed interface CoolLoginState {

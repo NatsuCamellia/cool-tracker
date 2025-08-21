@@ -13,7 +13,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val coolViewModel = CoolViewModel((application as CoolApplication).container.coolRepository)
+        val coolViewModel = CoolViewModel(application)
         setContent {
             COOLTrackerTheme {
                 COOLTrackerApp(coolViewModel)

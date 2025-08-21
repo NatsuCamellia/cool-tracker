@@ -1,26 +1,29 @@
 package net.natsucamellia.cooltracker.ui.screens
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 
@@ -37,6 +40,7 @@ fun AccountScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SuccessScreen(
     coolViewModel: CoolViewModel,
@@ -46,33 +50,138 @@ fun SuccessScreen(
     val defaultAvatarUrl = "https://cool.ntu.edu.tw/images/messages/avatar-50.png"
     val profile = accountUiState.profile
     Scaffold(
-        floatingActionButton = {
-            FloatingActionButton(onClick = coolViewModel::logout) {
-                Icon(imageVector = Icons.AutoMirrored.Filled.Logout, contentDescription = "Logout")
-            }
-        }
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        "Account",
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                )
+            )
+        },
+        containerColor = MaterialTheme.colorScheme.surfaceContainer
     ) { innerPadding ->
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = modifier
                 .padding(innerPadding)
                 .padding(horizontal = 16.dp)
                 .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
         ) {
-            AsyncImage(
-                model = profile.avatarUrl ?: defaultAvatarUrl,
-                contentDescription = "Avatar",
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .size(128.dp)
-                    .border(2.dp, MaterialTheme.colorScheme.secondaryContainer, CircleShape)
+            // Account
+            Text(
+                "Account",
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(horizontal = 8.dp)
             )
+            Spacer(Modifier.height(8.dp))
+            Column(
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                ListItem(
+                    headlineContent = { Text("Name") },
+                    supportingContent = { Text(profile.name) },
+                    trailingContent = {
+                        AsyncImage(
+                            model = profile.avatarUrl ?: defaultAvatarUrl,
+                            contentDescription = "Avatar",
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .border(
+                                    2.dp,
+                                    MaterialTheme.colorScheme.secondaryContainer,
+                                    CircleShape
+                                )
+                        )
+                    },
+                    modifier = modifier
+                        .clip(
+                            RoundedCornerShape(
+                                topStart = 24.dp,
+                                topEnd = 24.dp,
+                                bottomStart = 8.dp,
+                                bottomEnd = 8.dp
+                            )
+                        )
+                        .clickable(onClick = {})
+                )
+                ListItem(
+                    headlineContent = { Text("ID") },
+                    supportingContent = { Text("${profile.id}") },
+                    modifier = modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable(onClick = {})
+                )
+                ListItem(
+                    headlineContent = { Text("Email") },
+                    supportingContent = { Text(profile.primaryEmail) },
+                    modifier = modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable(onClick = {})
+                )
+                ListItem(
+                    headlineContent = { Text("Bio") },
+                    supportingContent = { Text(profile.bio ?: "You don't have a bio yet.") },
+                    modifier = modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable(onClick = {})
+                )
+                ListItem(
+                    headlineContent = {
+                        Text(
+                            text = "Logout",
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    },
+                    modifier = modifier
+                        .clip(
+                            RoundedCornerShape(
+                                topStart = 8.dp,
+                                topEnd = 8.dp,
+                                bottomStart = 24.dp,
+                                bottomEnd = 24.dp
+                            )
+                        )
+                        .clickable(onClick = coolViewModel::logout)
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
-            Text(text = "#${profile.id}")
-            Text(text = profile.name, style = MaterialTheme.typography.titleLarge)
-            if (profile.bio != null) {
-                Text(text = profile.bio, fontStyle = FontStyle.Italic)
+            // About
+            Text(
+                "About",
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(horizontal = 8.dp)
+            )
+            Spacer(Modifier.height(8.dp))
+            Column(
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                ListItem(
+                    headlineContent = { Text("Source Code") },
+                    supportingContent = { Text("Check the source code on GitHub") },
+                    modifier = modifier
+                        .clip(
+                            RoundedCornerShape(24, 24, 8, 8)
+                        )
+                        .clickable(onClick = { coolViewModel.openUrl("https://github.com/natsucamellia/cool-tracker") })
+                )
+                ListItem(
+                    headlineContent = { Text("Version") },
+                    supportingContent = { Text("0.1") },
+                    modifier = modifier
+                        .clip(
+                            RoundedCornerShape(8, 8, 24, 24)
+                        )
+                        .clickable(onClick = {})
+                )
             }
         }
     }
