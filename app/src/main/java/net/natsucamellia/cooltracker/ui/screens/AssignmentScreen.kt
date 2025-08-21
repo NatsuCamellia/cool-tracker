@@ -7,13 +7,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.LoadingIndicator
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -49,10 +45,7 @@ fun AssignmentScreen(
     }
 }
 
-@OptIn(
-    ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class,
-    ExperimentalTime::class
-)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun SuccessScreen(
     uiState: CoolViewModel.CoolUiState.Success,
@@ -63,73 +56,57 @@ private fun SuccessScreen(
     val refreshState = rememberPullToRefreshState()
     val courses = uiState.courses
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        "Assignments",
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer
-                ),
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = {
+            isRefreshing = true
+            onRefresh { isRefreshing = false }
+        },
+        state = refreshState,
+        indicator = {
+            LoadingIndicator(
+                state = refreshState,
+                isRefreshing = isRefreshing,
+                modifier = Modifier.align(Alignment.TopCenter)
             )
         },
-        containerColor = MaterialTheme.colorScheme.surfaceContainer,
-    ) { innerPadding ->
-        PullToRefreshBox(
-            isRefreshing = isRefreshing,
-            onRefresh = {
-                isRefreshing = true
-                onRefresh { isRefreshing = false }
-            },
-            state = refreshState,
-            indicator = {
-                LoadingIndicator(
-                    state = refreshState,
-                    isRefreshing = isRefreshing,
-                    modifier = Modifier.align(Alignment.TopCenter)
-                )
-            },
-            modifier = modifier.padding(innerPadding)
+        modifier = modifier
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .verticalScroll(rememberScrollState())
         ) {
-            Column(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .verticalScroll(rememberScrollState())
-            ) {
-                Text(
-                    "Ongoing",
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
+            Text(
+                "Ongoing",
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            courses.forEach {
+                CourseCard(
+                    course = it,
+                    onGoing = true,
+                    modifier = Modifier.padding(vertical = 16.dp)
                 )
-                courses.forEach {
-                    CourseCard(
-                        course = it,
-                        onGoing = true,
-                        modifier = Modifier.padding(vertical = 16.dp)
-                    )
-                }
+            }
 
-                Spacer(modifier = Modifier.height(32.dp))
-                Text(
-                    "Closed",
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
+            Spacer(modifier = Modifier.height(32.dp))
+            Text(
+                "Closed",
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            courses.forEach {
+                CourseCard(
+                    course = it,
+                    onGoing = false,
+                    modifier = Modifier.padding(vertical = 16.dp)
                 )
-                courses.forEach {
-                    CourseCard(
-                        course = it,
-                        onGoing = false,
-                        modifier = Modifier.padding(vertical = 16.dp)
-                    )
-                }
             }
         }
+
     }
 }
 
