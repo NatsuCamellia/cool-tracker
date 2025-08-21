@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
@@ -18,13 +19,20 @@ import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 
 @Composable
@@ -40,15 +48,48 @@ fun WelcomeScreen(
                 .fillMaxSize()
                 .padding(innerPadding),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.SpaceAround
         ) {
-            Text("Welcome")
-            Button(
-                onClick = onLogin
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Icon(Icons.AutoMirrored.Filled.Login, "Login")
-                Spacer(modifier = Modifier.width(ButtonDefaults.IconSpacing))
-                Text("Login")
+                Text(
+                    "Welcome",
+                    style = MaterialTheme.typography.displayLarge,
+                    fontFamily = FontFamily.Serif
+                )
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    text = "Never miss an assignment again.",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Button(
+                    onClick = onLogin
+                ) {
+                    Icon(Icons.AutoMirrored.Filled.Login, "Login")
+                    Spacer(modifier = Modifier.width(ButtonDefaults.IconSpacing))
+                    Text("Log in to NTU COOL")
+                }
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    text = buildAnnotatedString {
+                        append("By logging in,\nyou agree to the ")
+                        withLink(
+                            LinkAnnotation.Url(
+                                "https://github.com/NatsuCamellia/cool-tracker?tab=readme-ov-file#隱私權與免責聲明"
+                            )
+                        ) {
+                            append("Privacy Policy & Disclaimer")
+                        }
+                        append(".")
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    textAlign = TextAlign.Center
+                )
             }
         }
     }
