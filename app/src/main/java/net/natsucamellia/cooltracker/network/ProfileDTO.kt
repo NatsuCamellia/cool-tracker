@@ -2,6 +2,9 @@ package net.natsucamellia.cooltracker.network
 
 import com.google.gson.annotations.SerializedName
 
+/**
+ * @see <a href="https://developerdocs.instructure.com/services/canvas/resources/users">User API Documentation</a>,
+ */
 data class ProfileDTO(
     val id: Int,
     val name: String,

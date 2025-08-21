@@ -1,5 +1,8 @@
 package net.natsucamellia.cooltracker.model
 
+/**
+ * @sample [sampleProfile]
+ */
 data class Profile(
     val id: Int,
     val name: String,
@@ -8,7 +11,7 @@ data class Profile(
     val avatarUrl: String?
 )
 
-val fakeProfile: Profile = Profile(
+val sampleProfile: Profile = Profile(
     id = 1,
     name = "Sample User",
     bio = "Hello!",

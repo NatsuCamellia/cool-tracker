@@ -10,6 +10,7 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
+/** Encrypt and decrypt data using AES-GCM with Android Keystore. */
 class KeystoreManager {
     private var keyStore: KeyStore
 
@@ -24,6 +25,13 @@ class KeystoreManager {
         }
     }
 
+    /**
+     * Retrieves the secret key from the Android Keystore.
+     * Generate one if not found.
+     *
+     * @return the secret key.
+     * @throws RuntimeException if key retrieval fails.
+     */
     private fun getSecretKey(): SecretKey {
         return try {
             val key = keyStore.getKey(KEY_ALIAS, null)
@@ -39,6 +47,12 @@ class KeystoreManager {
         }
     }
 
+    /**
+     * Generates a new secret key and stores it in the Android Keystore.
+     *
+     * @return the generated secret key.
+     * @throws RuntimeException if key generation fails.
+     */
     private fun generateNewKey(): SecretKey {
         try {
             val keyGenerator = KeyGenerator.getInstance(
@@ -63,6 +77,10 @@ class KeystoreManager {
         }
     }
 
+    /**
+     * Encrypts [data] with stored secret key.
+     * @return pair of encrypted data and initialization vector (IV), null if encryption fails.
+     */
     fun encrypt(data: String): Pair<String, String>? {
         return try {
             val secretKey = getSecretKey()
@@ -83,7 +101,10 @@ class KeystoreManager {
         }
     }
 
-    // 解密資料
+    /**
+     * Decrypts [encryptedData] with stored secret key and [ivString].
+     * @return decrypted data, null if decryption fails.
+     */
     fun decrypt(encryptedData: String, ivString: String): String? {
         return try {
             val secretKey = getSecretKey()

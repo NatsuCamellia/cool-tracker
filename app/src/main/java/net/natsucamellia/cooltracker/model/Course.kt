@@ -1,5 +1,8 @@
 package net.natsucamellia.cooltracker.model
 
+/**
+ * @sample [sampleCourse]
+ */
 data class Course(
     val id: Int,
     val name: String,
@@ -25,10 +28,10 @@ val Course.englishName: String
         return name.substring(indexOfLeftParen).trim()
     }
 
-val fakeCourse: Course = Course(
+val sampleCourse: Course = Course(
     id = 49109,
     name = "人工智慧導論 Foundations of Artificial Intelligence",
     isPublic = false,
     courseCode = "人工智慧導論 (CSIE3005-01、02)",
-    assignments = listOf(fakeAssignment)
+    assignments = listOf(sampleAssignment)
 )

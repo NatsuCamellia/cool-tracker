@@ -3,7 +3,9 @@ package net.natsucamellia.cooltracker.model
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
-
+/**
+ * @sample [sampleAssignment]
+ */
 @OptIn(ExperimentalTime::class)
 data class Assignment(
     val id: Int,
@@ -15,7 +17,7 @@ data class Assignment(
 )
 
 @OptIn(ExperimentalTime::class)
-val fakeAssignment: Assignment = Assignment(
+val sampleAssignment: Assignment = Assignment(
     id = 309627,
     dueTime = Instant.parse("2026-06-11T15:59:59Z"),
     pointsPossible = 110.0,

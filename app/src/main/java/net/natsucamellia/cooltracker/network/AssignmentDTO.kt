@@ -2,6 +2,9 @@ package net.natsucamellia.cooltracker.network
 
 import com.google.gson.annotations.SerializedName
 
+/**
+ * @see <a href="https://developerdocs.instructure.com/services/canvas/resources/assignments">Assignment API Documentation</a>
+ */
 data class AssignmentDTO(
     val id: Int,
     @SerializedName("due_at")
@@ -14,6 +17,9 @@ data class AssignmentDTO(
     val submission: SubmissionDTO
 )
 
+/**
+ * @see <a href="https://developerdocs.instructure.com/services/canvas/resources/submissions">Submission API Documentation</a>
+ */
 data class SubmissionDTO(
     val id: Int,
     @SerializedName("workflow_state")
