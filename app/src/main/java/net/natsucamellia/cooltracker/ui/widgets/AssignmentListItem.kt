@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.datetime.LocalDateTime
@@ -114,7 +115,12 @@ fun AssignmentListItem(
                 Text(
                     text = dueLocalDateTime.format(format) +
                             if (durationRemaining.isPositive())
-                                " (${formatDurationLargestTwoUnits(durationRemaining)})"
+                                " (${
+                                    formatDurationLargestTwoUnits(
+                                        LocalContext.current,
+                                        durationRemaining
+                                    )
+                                })"
                             else
                                 "",
                     style = MaterialTheme.typography.labelSmall

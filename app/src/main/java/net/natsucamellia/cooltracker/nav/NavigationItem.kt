@@ -8,18 +8,22 @@ import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.School
 import androidx.compose.ui.graphics.vector.ImageVector
+import net.natsucamellia.cooltracker.R
 
 sealed class NavigationItem(
     /** The icon to show when the item is selected */
     val filledIcon: ImageVector,
     /** The icon to show when the item is not selected */
     val outlinedIcon: ImageVector,
-    val title: String
+    val titleResId: Int
 ) {
     data object Courses : NavigationItem(Icons.Filled.School,
-        Icons.Outlined.School, "Courses")
+        Icons.Outlined.School, R.string.courses
+    )
     data object Assignments : NavigationItem(Icons.AutoMirrored.Filled.Assignment,
-        Icons.AutoMirrored.Outlined.Assignment, "Assignments")
+        Icons.AutoMirrored.Outlined.Assignment, R.string.assignments
+    )
     data object Account : NavigationItem(Icons.Filled.AccountCircle,
-        Icons.Outlined.AccountCircle, "Account")
+        Icons.Outlined.AccountCircle, R.string.account
+    )
 }

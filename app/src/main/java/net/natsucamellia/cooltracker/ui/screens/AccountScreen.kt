@@ -20,8 +20,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import net.natsucamellia.cooltracker.R
 import net.natsucamellia.cooltracker.ui.theme.ClipShapes
 import net.natsucamellia.cooltracker.ui.widgets.SectionLabel
 
@@ -55,7 +57,7 @@ fun SuccessScreen(
     ) {
         // Account
         SectionLabel(
-            text = "Account",
+            text = stringResource(R.string.account),
             modifier = Modifier.padding(horizontal = 8.dp)
         )
         Spacer(Modifier.height(8.dp))
@@ -65,7 +67,7 @@ fun SuccessScreen(
         ) {
             // Name and avatar
             ListItem(
-                headlineContent = { Text("Name") },
+                headlineContent = { Text(stringResource(R.string.name)) },
                 supportingContent = { Text(profile.name) },
                 trailingContent = {
                     AsyncImage(
@@ -86,7 +88,7 @@ fun SuccessScreen(
             )
             // ID
             ListItem(
-                headlineContent = { Text("ID") },
+                headlineContent = { Text(stringResource(R.string.id)) },
                 supportingContent = { Text("${profile.id}") },
                 modifier = modifier
                     .clip(ClipShapes.innerRoundedCornerShape)
@@ -94,7 +96,7 @@ fun SuccessScreen(
             )
             // Email
             ListItem(
-                headlineContent = { Text("Email") },
+                headlineContent = { Text(stringResource(R.string.email)) },
                 supportingContent = { Text(profile.primaryEmail) },
                 modifier = modifier
                     .clip(ClipShapes.innerRoundedCornerShape)
@@ -102,7 +104,7 @@ fun SuccessScreen(
             )
             // Bio
             ListItem(
-                headlineContent = { Text("Bio") },
+                headlineContent = { Text(stringResource(R.string.bio)) },
                 supportingContent = { Text(profile.bio ?: "You don't have a bio yet.") },
                 modifier = modifier
                     .clip(ClipShapes.innerRoundedCornerShape)
@@ -112,7 +114,7 @@ fun SuccessScreen(
             ListItem(
                 headlineContent = {
                     Text(
-                        text = "Logout",
+                        text = stringResource(R.string.logout),
                         color = MaterialTheme.colorScheme.error
                     )
                 },
@@ -125,7 +127,7 @@ fun SuccessScreen(
         Spacer(modifier = Modifier.height(16.dp))
         // About the app
         SectionLabel(
-            text = "About",
+            text = stringResource(R.string.about),
             modifier = Modifier.padding(horizontal = 8.dp)
         )
         Spacer(Modifier.height(8.dp))
@@ -136,8 +138,8 @@ fun SuccessScreen(
             // Source Code
             val context = LocalContext.current
             ListItem(
-                headlineContent = { Text("Source Code") },
-                supportingContent = { Text("Check the source code on GitHub") },
+                headlineContent = { Text(stringResource(R.string.source_code)) },
+                supportingContent = { Text(stringResource(R.string.source_code_desc)) },
                 modifier = modifier
                     .clip(ClipShapes.innerRoundedCornerShape)
                     .clickable(onClick = {
@@ -149,7 +151,7 @@ fun SuccessScreen(
             )
             // Version
             ListItem(
-                headlineContent = { Text("Version") },
+                headlineContent = { Text(stringResource(R.string.version)) },
                 supportingContent = { Text(coolViewModel.getAppVersion()) },
                 modifier = modifier
                     .clip(ClipShapes.innerRoundedCornerShape)

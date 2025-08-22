@@ -1,5 +1,6 @@
 package net.natsucamellia.cooltracker.ui.screens
 
+import android.content.Context
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -21,8 +22,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import net.natsucamellia.cooltracker.R
 import net.natsucamellia.cooltracker.model.Course
 import net.natsucamellia.cooltracker.model.chineseName
 import net.natsucamellia.cooltracker.model.englishName
@@ -82,7 +85,7 @@ private fun SuccessScreen(
         ) {
             item {
                 SectionLabel(
-                    text = "Ongoing",
+                    text = stringResource(R.string.ongoing),
                     modifier = Modifier.padding(horizontal = 8.dp)
                 )
             }
@@ -97,7 +100,7 @@ private fun SuccessScreen(
             item {
                 Spacer(modifier = Modifier.height(32.dp))
                 SectionLabel(
-                    text = "Closed",
+                    text = stringResource(R.string.closed),
                     modifier = Modifier.padding(horizontal = 8.dp)
                 )
             }
@@ -163,13 +166,25 @@ private fun CourseCard(
     }
 }
 
-fun formatDurationLargestTwoUnits(duration: Duration): String {
+fun formatDurationLargestTwoUnits(context: Context, duration: Duration): String {
     return duration.toComponents { days, hours, minutes, seconds, _ ->
         val parts = mutableListOf<String>()
-        if (days > 0) parts.add("${days}d ${hours}h")
-        else if (hours > 0) parts.add("${hours}h ${minutes}m")
-        else if (minutes > 0) parts.add("${minutes}m ${seconds}s")
-        else if (seconds > 0) parts.add("${seconds}s")
+        if (days > 0) parts.add(context.getString(R.string.format_day_hour, days, hours))
+        else if (hours > 0) parts.add(
+            context.getString(
+                R.string.format_hour_minute,
+                hours,
+                minutes
+            )
+        )
+        else if (minutes > 0) parts.add(
+            context.getString(
+                R.string.format_minute_second,
+                minutes,
+                seconds
+            )
+        )
+        else if (seconds > 0) parts.add(context.getString(R.string.format_second, seconds))
         if (parts.isEmpty()) {
             "0s"
         } else {

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="welcome">歡迎</string>
+    <string name="slogan">不再錯過作業死線</string>
+    <string name="log_in_to_ntu_cool">登入 NTU COOL</string>
+    <string name="agreement1">登入即表示您已閱讀、理解並同意</string>
+    <string name="privacy_policy_disclaimer">隱私權與免責聲明</string>
+    <string name="period">。</string>
+    <string name="ongoing">進行中</string>
+    <string name="closed">已結束</string>
+    <string name="format_day_hour">%1$d天 %2$d時</string>
+    <string name="format_hour_minute">%1$d時 %2$d分</string>
+    <string name="format_minute_second">%1$d分 %2$d秒</string>
+    <string name="format_second">%1$d秒</string>
+    <string name="account">帳號</string>
+    <string name="name">名稱</string>
+    <string name="id">ID</string>
+    <string name="email">電子郵件</string>
+    <string name="bio">個人簡介</string>
+    <string name="logout">登出</string>
+    <string name="about">關於</string>
+    <string name="source_code">開放原始碼</string>
+    <string name="version">版本</string>
+    <string name="courses">課程</string>
+    <string name="assignments">作業</string>
+    <string name="source_code_desc">在 GitHub 上檢視開放原始碼</string>
+</resources>

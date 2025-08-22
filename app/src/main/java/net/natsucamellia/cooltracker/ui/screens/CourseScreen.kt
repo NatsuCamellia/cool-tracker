@@ -28,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavType
@@ -36,6 +37,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.window.core.layout.WindowSizeClass
+import net.natsucamellia.cooltracker.R
 import net.natsucamellia.cooltracker.model.Course
 import net.natsucamellia.cooltracker.model.chineseName
 import net.natsucamellia.cooltracker.model.englishName
@@ -160,7 +162,7 @@ private fun CourseListScreen(
         ) {
             // Currently, this app only shows ongoing courses.
             SectionLabel(
-                text = "Ongoing",
+                text = stringResource(R.string.ongoing),
                 modifier = Modifier.padding(horizontal = 8.dp)
             )
             Spacer(Modifier.height(8.dp))

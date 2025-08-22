@@ -19,6 +19,7 @@ import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.window.core.layout.WindowSizeClass
 import net.natsucamellia.cooltracker.nav.NavigationItem
 import net.natsucamellia.cooltracker.ui.screens.AccountScreen
@@ -95,10 +96,10 @@ fun LoggedInScreen(
                             icon = {
                                 Icon(
                                     if (currentScreen == screen) screen.filledIcon else screen.outlinedIcon,
-                                    contentDescription = screen.title
+                                    contentDescription = stringResource(screen.titleResId)
                                 )
                             },
-                            label = { Text(screen.title) },
+                            label = { Text(stringResource(screen.titleResId)) },
                             selected = currentScreen == screen,
                             onClick = { coolViewModel.currentScreen = screen }
                         )
@@ -121,10 +122,10 @@ fun LoggedInScreen(
                             icon = {
                                 Icon(
                                     if (currentScreen == screen) screen.filledIcon else screen.outlinedIcon,
-                                    contentDescription = screen.title
+                                    contentDescription = stringResource(screen.titleResId)
                                 )
                             },
-                            label = { Text(screen.title) },
+                            label = { Text(stringResource(screen.titleResId)) },
                             selected = currentScreen == screen,
                             onClick = { coolViewModel.currentScreen = screen }
                         )

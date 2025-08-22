@@ -1,3 +1,27 @@
 <resources>
-    <string name="app_name">COOL Tracker</string>
+    <string name="app_name" translatable="false">COOL Tracker</string>
+    <string name="welcome">Welcome</string>
+    <string name="slogan">Never miss another deadline</string>
+    <string name="log_in_to_ntu_cool">Log in to NTU COOL</string>
+    <string name="agreement1">"By logging in,\nyou agree to the "</string>
+    <string name="privacy_policy_disclaimer"><![CDATA[Privacy Policy & Disclaimer]]></string>
+    <string name="period">.</string>
+    <string name="ongoing">Ongoing</string>
+    <string name="closed">Closed</string>
+    <string name="format_day_hour">%1$dd %2$dh</string>
+    <string name="format_hour_minute">%1$dh %2$dm</string>
+    <string name="format_minute_second">%1$dm %2$ds</string>
+    <string name="format_second">%1$ds</string>
+    <string name="account">Account</string>
+    <string name="name">Name</string>
+    <string name="id">ID</string>
+    <string name="email">Email</string>
+    <string name="bio">Bio</string>
+    <string name="logout">Logout</string>
+    <string name="about">About</string>
+    <string name="source_code">Source Code</string>
+    <string name="version">Version</string>
+    <string name="courses">Courses</string>
+    <string name="assignments">Assignments</string>
+    <string name="source_code_desc">Check the source code on GitHub</string>
 </resources>
