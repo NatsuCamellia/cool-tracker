@@ -1,6 +1,7 @@
 package net.natsucamellia.cooltracker.ui.screens
 
 import android.app.Application
+import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import androidx.compose.runtime.getValue
@@ -8,13 +9,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import net.natsucamellia.cooltracker.CoolApplication
 import net.natsucamellia.cooltracker.model.Course
 import net.natsucamellia.cooltracker.model.Profile
+import net.natsucamellia.cooltracker.nav.NavigationItem
 
 class CoolViewModel(
     private val application: Application
@@ -25,6 +30,7 @@ class CoolViewModel(
     // are chosen at random. They can be changed if needed.
     var coolLoginState: CoolLoginState by mutableStateOf(CoolLoginState.Init)
         private set
+    var currentScreen: NavigationItem by mutableStateOf(NavigationItem.Assignments)
     private val _coolUiState = MutableStateFlow<CoolUiState>(CoolUiState.Loading)
     val coolUiState = _coolUiState.asStateFlow()
     private val _accountUiState = MutableStateFlow<AccountUiState>(AccountUiState.Loading)
@@ -128,15 +134,27 @@ class CoolViewModel(
     /**
      * Open the given [url] in the external browser.
      */
-    fun openUrl(url: String) {
+    fun openUrl(context: Context, url: String) {
         val intent = Intent(Intent.ACTION_VIEW, url.toUri())
         intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
-        application.applicationContext.startActivity(intent)
+        context.startActivity(intent)
     }
 
     fun getAppVersion(): String {
         val packageInfo = application.packageManager.getPackageInfo(application.packageName, 0)
         return "${packageInfo.versionName} (${packageInfo.longVersionCode})"
+    }
+
+    companion object {
+        val Factory = viewModelFactory {
+            initializer {
+                // Since the viewmodel need application to get app version, we pass the application
+                // and it's context to the viewmodel. This won't cause any memory leaks because the
+                // viewmodel will be destroyed when the activity is destroyed.
+                val application = (this[APPLICATION_KEY] as CoolApplication)
+                CoolViewModel(application)
+            }
+        }
     }
 
     sealed interface CoolLoginState {

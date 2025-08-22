@@ -13,10 +13,6 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import net.natsucamellia.cooltracker.nav.NavigationItem
@@ -76,7 +72,7 @@ fun LoggedInScreen(
     coolViewModel: CoolViewModel,
     modifier: Modifier = Modifier
 ) {
-    var currentScreen by remember { mutableStateOf<NavigationItem>(NavigationItem.Assignments) }
+    val currentScreen = coolViewModel.currentScreen
     val navigationItems = listOf(
         NavigationItem.Courses,
         NavigationItem.Assignments,
@@ -95,7 +91,7 @@ fun LoggedInScreen(
                         },
                         label = { Text(screen.title) },
                         selected = currentScreen == screen,
-                        onClick = { currentScreen = screen }
+                        onClick = { coolViewModel.currentScreen = screen }
                     )
                 }
             }

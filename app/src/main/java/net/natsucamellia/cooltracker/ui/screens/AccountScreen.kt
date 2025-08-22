@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import net.natsucamellia.cooltracker.ui.theme.ClipShapes
@@ -133,12 +134,18 @@ fun SuccessScreen(
             modifier = Modifier.clip(ClipShapes.outerRoundedCornerShape)
         ) {
             // Source Code
+            val context = LocalContext.current
             ListItem(
                 headlineContent = { Text("Source Code") },
                 supportingContent = { Text("Check the source code on GitHub") },
                 modifier = modifier
                     .clip(ClipShapes.innerRoundedCornerShape)
-                    .clickable(onClick = { coolViewModel.openUrl("https://github.com/natsucamellia/cool-tracker") })
+                    .clickable(onClick = {
+                        coolViewModel.openUrl(
+                            context = context,
+                            url = "https://github.com/natsucamellia/cool-tracker"
+                        )
+                    })
             )
             // Version
             ListItem(
