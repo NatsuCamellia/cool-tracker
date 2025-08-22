@@ -32,8 +32,8 @@ import net.natsucamellia.cooltracker.ui.widgets.AssignmentListItem
 @Composable
 fun CourseDetailScreen(
     course: Course,
-    navigateUp: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    navigateUp: (() -> Unit)? = null
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
@@ -54,13 +54,15 @@ fun CourseDetailScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(
-                        onClick = navigateUp
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
-                        )
+                    if (navigateUp != null) {
+                        IconButton(
+                            onClick = navigateUp
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back"
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(

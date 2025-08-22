@@ -1,6 +1,7 @@
 package net.natsucamellia.cooltracker.ui
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -10,11 +11,15 @@ import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.window.core.layout.WindowSizeClass
 import net.natsucamellia.cooltracker.nav.NavigationItem
 import net.natsucamellia.cooltracker.ui.screens.AccountScreen
 import net.natsucamellia.cooltracker.ui.screens.AssignmentScreen
@@ -70,7 +75,8 @@ fun InitScreen(modifier: Modifier = Modifier) {
 @Composable
 fun LoggedInScreen(
     coolViewModel: CoolViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    windowSizeClass: WindowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
 ) {
     val currentScreen = coolViewModel.currentScreen
     val navigationItems = listOf(
@@ -78,32 +84,53 @@ fun LoggedInScreen(
         NavigationItem.Assignments,
         NavigationItem.Account
     )
+    val useNavigationRail = windowSizeClass
+        .isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
     Scaffold(
         bottomBar = {
-            NavigationBar {
-                navigationItems.forEach { screen ->
-                    NavigationBarItem(
-                        icon = {
-                            Icon(
-                                if (currentScreen == screen) screen.filledIcon else screen.outlinedIcon,
-                                contentDescription = screen.title
-                            )
-                        },
-                        label = { Text(screen.title) },
-                        selected = currentScreen == screen,
-                        onClick = { coolViewModel.currentScreen = screen }
-                    )
+            if (!useNavigationRail) {
+                NavigationBar {
+                    navigationItems.forEach { screen ->
+                        NavigationBarItem(
+                            icon = {
+                                Icon(
+                                    if (currentScreen == screen) screen.filledIcon else screen.outlinedIcon,
+                                    contentDescription = screen.title
+                                )
+                            },
+                            label = { Text(screen.title) },
+                            selected = currentScreen == screen,
+                            onClick = { coolViewModel.currentScreen = screen }
+                        )
+                    }
                 }
             }
         },
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
         modifier = modifier
     ) { innerPadding ->
-        Box(
+        Row(
             modifier = Modifier
                 .padding(innerPadding)
                 .consumeWindowInsets(innerPadding)
-        ) { // Apply innerPadding to content
+        ) {
+            if (useNavigationRail) {
+                NavigationRail(containerColor = MaterialTheme.colorScheme.surfaceContainer) {
+                    navigationItems.forEach { screen ->
+                        NavigationRailItem(
+                            icon = {
+                                Icon(
+                                    if (currentScreen == screen) screen.filledIcon else screen.outlinedIcon,
+                                    contentDescription = screen.title
+                                )
+                            },
+                            label = { Text(screen.title) },
+                            selected = currentScreen == screen,
+                            onClick = { coolViewModel.currentScreen = screen }
+                        )
+                    }
+                }
+            }
             when (currentScreen) {
                 NavigationItem.Assignments -> AssignmentScreen(coolViewModel)
                 NavigationItem.Courses -> CourseScreen(coolViewModel)

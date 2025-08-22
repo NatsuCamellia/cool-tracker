@@ -2,8 +2,11 @@ package net.natsucamellia.cooltracker.ui.screens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -12,6 +15,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.LoadingIndicator
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -31,6 +35,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.window.core.layout.WindowSizeClass
 import net.natsucamellia.cooltracker.model.Course
 import net.natsucamellia.cooltracker.model.chineseName
 import net.natsucamellia.cooltracker.model.englishName
@@ -39,14 +44,14 @@ import net.natsucamellia.cooltracker.ui.widgets.SectionLabel
 
 @Composable
 fun CourseScreen(
-    coolViewModel: CoolViewModel,
+    coolViewModel: CoolViewModel
 ) {
     coolViewModel.coolUiState.collectAsState().value.let { coolUiState ->
         when (coolUiState) {
             is CoolViewModel.CoolUiState.Error -> ErrorScreen { coolViewModel.loadCourses() }
             is CoolViewModel.CoolUiState.Loading -> LoadingScreen()
             is CoolViewModel.CoolUiState.Success -> SuccessScreen(
-                uiState = coolUiState,
+                courses = coolUiState.courses,
             ) { onDone ->
                 coolViewModel.loadCourses(onDone = onDone)
             }
@@ -57,37 +62,68 @@ fun CourseScreen(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun SuccessScreen(
-    uiState: CoolViewModel.CoolUiState.Success,
+    courses: List<Course>,
     modifier: Modifier = Modifier,
+    windowSizeClass: WindowSizeClass = currentWindowAdaptiveInfo().windowSizeClass,
     onRefresh: (() -> Unit) -> Unit = {},
 ) {
-    val navController = rememberNavController()
+    // If the screen is wide enough, we split the screen into two parts
+    val splitScreen =
+        windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
 
-    NavHost(navController, startDestination = "/", modifier = modifier) {
-        // Show the course list
-        composable("/") {
+    if (splitScreen) {
+        var selectedCourse by remember { mutableStateOf<Course?>(null) }
+        Row {
+            // Left for course list
             CourseListScreen(
-                courses = uiState.courses,
+                courses = courses,
                 onRefresh = onRefresh,
-                onCourseClick = { navController.navigate("/$it") }
+                onCourseClick = { selectedCourse = it },
+                modifier = Modifier.weight(4f)
             )
+            // and right for course detail
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .weight(5f)
+            ) {
+                if (selectedCourse != null) {
+                    CourseDetailScreen(
+                        course = selectedCourse!!
+                    )
+                }
+            }
         }
-        // Show the assignment list of a course
-        composable(
-            route = "/{courseId}",
-            arguments = listOf(navArgument("courseId") { type = NavType.IntType })
-        ) {
-            val courseId = it.arguments?.getInt("courseId")
-            val course = uiState.courses.find { course -> course.id == courseId }
-            // Ideally this should never be null
-            if (course != null) {
-                CourseDetailScreen(
-                    course = course,
-                    navigateUp = { navController.navigateUp() }
+    } else {
+        // The screen is not wide enough, show stacked screens
+        val navController = rememberNavController()
+        NavHost(navController, startDestination = "/", modifier = modifier) {
+            // Show the course list
+            composable("/") {
+                CourseListScreen(
+                    courses = courses,
+                    onRefresh = onRefresh,
+                    onCourseClick = { navController.navigate("/${it.id}") }
                 )
+            }
+            // Show the assignment list of a course
+            composable(
+                route = "/{courseId}",
+                arguments = listOf(navArgument("courseId") { type = NavType.IntType })
+            ) {
+                val courseId = it.arguments?.getInt("courseId")
+                val course = courses.find { course -> course.id == courseId }
+                // Ideally this should never be null
+                if (course != null) {
+                    CourseDetailScreen(
+                        course = course,
+                        navigateUp = { navController.navigateUp() }
+                    )
+                }
             }
         }
     }
+
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
@@ -96,7 +132,7 @@ private fun CourseListScreen(
     courses: List<Course>,
     modifier: Modifier = Modifier,
     onRefresh: (() -> Unit) -> Unit = {},
-    onCourseClick: (Int) -> Unit = {}
+    onCourseClick: (Course) -> Unit = {}
 ) {
     var isRefreshing by remember { mutableStateOf(false) }
     val refreshState = rememberPullToRefreshState()
@@ -138,7 +174,7 @@ private fun CourseListScreen(
                         course = it,
                         modifier = Modifier
                             .clickable(
-                                onClick = { onCourseClick(it.id) }
+                                onClick = { onCourseClick(it) }
                             )
                     )
                 }

@@ -18,6 +18,7 @@ kotlinxCoroutinesAndroid = "1.10.2"
 securityCryptoKtx = "1.1.0"
 coil = "3.3.0"
 navigationCompose = "2.9.3"
+adaptiveAndroid = "1.1.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -45,6 +46,7 @@ androidx-security-crypto-ktx = { group = "androidx.security", name = "security-c
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
 coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+androidx-adaptive-android = { group = "androidx.compose.material3.adaptive", name = "adaptive-android", version.ref = "adaptiveAndroid" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
