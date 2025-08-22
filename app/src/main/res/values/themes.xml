@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <style name="Theme.COOLTracker" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="Theme.COOLTracker.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <!-- Set the theme of the Activity that directly follows the screen. -->
+        <item name="postSplashScreenTheme">@style/Theme.COOLTracker</item>
+    </style>
 </resources>
