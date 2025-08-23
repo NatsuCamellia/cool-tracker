@@ -60,7 +60,7 @@ fun CourseScreen(
 
     if (splitScreen) {
         var selectedCourse by remember { mutableStateOf<Course?>(null) }
-        Row(modifier = modifier.padding(16.dp)) {
+        Row(modifier = modifier.padding(horizontal = 16.dp)) {
             // Left for course list
             CourseListScreen(
                 uiState = uiState,
