@@ -22,6 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,7 +44,9 @@ fun WelcomeScreen(
     onLogin: () -> Unit = {}
 ) {
     Scaffold(
-        modifier = modifier
+        modifier = modifier,
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        contentColor = contentColorFor(MaterialTheme.colorScheme.surfaceContainer)
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -118,7 +121,9 @@ fun LoginWebViewScreen(
     val context = LocalContext.current
 
     Scaffold(
-        modifier = modifier
+        modifier = modifier,
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        contentColor = contentColorFor(MaterialTheme.colorScheme.surfaceContainer)
     ) { innerPadding ->
         AndroidView(
             modifier = Modifier

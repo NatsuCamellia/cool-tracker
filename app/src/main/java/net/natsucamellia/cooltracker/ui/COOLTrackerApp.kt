@@ -16,6 +16,7 @@ import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,7 +62,11 @@ fun COOLTrackerApp(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun InitScreen(modifier: Modifier = Modifier) {
-    Scaffold(modifier = modifier) { innerPadding ->
+    Scaffold(
+        modifier = modifier,
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        contentColor = contentColorFor(MaterialTheme.colorScheme.surfaceContainer)
+    ) { innerPadding ->
         Box(
             modifier = modifier
                 .fillMaxSize()
@@ -73,6 +78,7 @@ fun InitScreen(modifier: Modifier = Modifier) {
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun LoggedInScreen(
     coolViewModel: CoolViewModel,
@@ -108,6 +114,7 @@ fun LoggedInScreen(
             }
         },
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        contentColor = contentColorFor(MaterialTheme.colorScheme.surfaceContainer),
         modifier = modifier
     ) { innerPadding ->
         Row(
@@ -116,7 +123,10 @@ fun LoggedInScreen(
                 .consumeWindowInsets(innerPadding)
         ) {
             if (useNavigationRail) {
-                NavigationRail(containerColor = MaterialTheme.colorScheme.surfaceContainer) {
+                NavigationRail(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    contentColor = contentColorFor(MaterialTheme.colorScheme.surfaceContainer),
+                ) {
                     navigationItems.forEach { screen ->
                         NavigationRailItem(
                             icon = {
