@@ -15,6 +15,10 @@ class MainActivity : ComponentActivity() {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // https://www.reddit.com/r/androiddev/comments/1d6xk8h/completely_transparent_navigation_bar/
+        // This prevent navigation bars (system) on some devices from being white or black, so they
+        // can have the same color as the NavigationBar (the Composable).
+        window.isNavigationBarContrastEnforced = false
 
         setContent {
             val coolViewModel = viewModel<CoolViewModel>(factory = CoolViewModel.Factory)
