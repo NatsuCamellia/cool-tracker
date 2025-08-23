@@ -11,23 +11,28 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TwoRowsTopAppBar
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.LoadingIndicator
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -42,44 +47,24 @@ import net.natsucamellia.cooltracker.model.Course
 import net.natsucamellia.cooltracker.model.chineseName
 import net.natsucamellia.cooltracker.model.englishName
 import net.natsucamellia.cooltracker.ui.theme.ClipShapes
+import net.natsucamellia.cooltracker.ui.widgets.AssignmentListItem
 import net.natsucamellia.cooltracker.ui.widgets.SectionLabel
 
 @Composable
 fun CourseScreen(
-    coolViewModel: CoolViewModel
-) {
-    coolViewModel.coolUiState.collectAsState().value.let { coolUiState ->
-        when (coolUiState) {
-            is CoolViewModel.CoolUiState.Error -> ErrorScreen { coolViewModel.loadCourses() }
-            is CoolViewModel.CoolUiState.Loading -> LoadingScreen()
-            is CoolViewModel.CoolUiState.Success -> SuccessScreen(
-                courses = coolUiState.courses,
-            ) { onDone ->
-                coolViewModel.loadCourses(onDone = onDone)
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
-@Composable
-private fun SuccessScreen(
-    courses: List<Course>,
+    uiState: CoolViewModel.CoolUiState.Success,
     modifier: Modifier = Modifier,
     windowSizeClass: WindowSizeClass = currentWindowAdaptiveInfo().windowSizeClass,
-    onRefresh: (() -> Unit) -> Unit = {},
 ) {
-    // If the screen is wide enough, we split the screen into two parts
     val splitScreen =
         windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
 
     if (splitScreen) {
         var selectedCourse by remember { mutableStateOf<Course?>(null) }
-        Row {
+        Row(modifier = modifier.padding(16.dp)) {
             // Left for course list
             CourseListScreen(
-                courses = courses,
-                onRefresh = onRefresh,
+                uiState = uiState,
                 onCourseClick = { selectedCourse = it },
                 modifier = Modifier.weight(4f)
             )
@@ -89,9 +74,12 @@ private fun SuccessScreen(
                     .fillMaxHeight()
                     .weight(5f)
             ) {
-                if (selectedCourse != null) {
+                val course = selectedCourse
+                if (course != null) {
                     CourseDetailScreen(
-                        course = selectedCourse!!
+                        course = course,
+                        modifier = Modifier
+                            .padding(start = 16.dp)
                     )
                 }
             }
@@ -103,9 +91,9 @@ private fun SuccessScreen(
             // Show the course list
             composable("/") {
                 CourseListScreen(
-                    courses = courses,
-                    onRefresh = onRefresh,
-                    onCourseClick = { navController.navigate("/${it.id}") }
+                    uiState = uiState,
+                    onCourseClick = { navController.navigate("/${it.id}") },
+                    modifier = Modifier.padding(horizontal = 16.dp)
                 )
             }
             // Show the assignment list of a course
@@ -114,72 +102,47 @@ private fun SuccessScreen(
                 arguments = listOf(navArgument("courseId") { type = NavType.IntType })
             ) {
                 val courseId = it.arguments?.getInt("courseId")
-                val course = courses.find { course -> course.id == courseId }
+                val course = uiState.courses.find { course -> course.id == courseId }
                 // Ideally this should never be null
                 if (course != null) {
                     CourseDetailScreen(
                         course = course,
-                        navigateUp = { navController.navigateUp() }
+                        navigateUp = { navController.navigateUp() },
+                        modifier = Modifier.padding(horizontal = 16.dp)
                     )
                 }
             }
         }
     }
-
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun CourseListScreen(
-    courses: List<Course>,
+    uiState: CoolViewModel.CoolUiState.Success,
     modifier: Modifier = Modifier,
-    onRefresh: (() -> Unit) -> Unit = {},
     onCourseClick: (Course) -> Unit = {}
 ) {
-    var isRefreshing by remember { mutableStateOf(false) }
-    val refreshState = rememberPullToRefreshState()
-
-    PullToRefreshBox(
-        isRefreshing = isRefreshing,
-        onRefresh = {
-            isRefreshing = true
-            onRefresh { isRefreshing = false }
-        },
-        state = refreshState,
-        indicator = {
-            LoadingIndicator(
-                state = refreshState,
-                isRefreshing = isRefreshing,
-                modifier = Modifier.align(Alignment.TopCenter)
-            )
-        },
-        modifier = modifier
-    ) {
+    Column(modifier = modifier.verticalScroll(rememberScrollState())) {
+        // Currently, this app only shows ongoing courses.
+        SectionLabel(
+            text = stringResource(R.string.ongoing),
+            modifier = Modifier.padding(horizontal = 8.dp)
+        )
+        Spacer(Modifier.height(8.dp))
         Column(
+            verticalArrangement = Arrangement.spacedBy(2.dp),
             modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .verticalScroll(rememberScrollState())
+                .clip(ClipShapes.outerRoundedCornerShape)
         ) {
-            // Currently, this app only shows ongoing courses.
-            SectionLabel(
-                text = stringResource(R.string.ongoing),
-                modifier = Modifier.padding(horizontal = 8.dp)
-            )
-            Spacer(Modifier.height(8.dp))
-            Column(
-                verticalArrangement = Arrangement.spacedBy(2.dp),
-                modifier = Modifier
-                    .clip(ClipShapes.outerRoundedCornerShape)
-            ) {
-                courses.forEach {
-                    CourseListItem(
-                        course = it,
-                        modifier = Modifier
-                            .clickable(
-                                onClick = { onCourseClick(it) }
-                            )
-                    )
-                }
+            uiState.courses.forEach {
+                CourseListItem(
+                    course = it,
+                    modifier = Modifier
+                        .clickable(
+                            onClick = { onCourseClick(it) }
+                        )
+                )
             }
         }
     }
@@ -207,4 +170,75 @@ private fun CourseListItem(
         },
         modifier = modifier
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun CourseDetailScreen(
+    course: Course,
+    modifier: Modifier = Modifier,
+    navigateUp: (() -> Unit)? = null
+) {
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    Scaffold(
+        topBar = {
+            TwoRowsTopAppBar(
+                title = {
+                    Text(
+                        course.courseCode,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
+                subtitle = {
+                    Text(
+                        course.englishName,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
+                navigationIcon = {
+                    if (navigateUp != null) {
+                        IconButton(
+                            onClick = navigateUp
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back"
+                            )
+                        }
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                ),
+                scrollBehavior = scrollBehavior
+            )
+        },
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        contentColor = contentColorFor(MaterialTheme.colorScheme.surfaceContainer),
+        modifier = Modifier
+            .nestedScroll(scrollBehavior.nestedScrollConnection)
+    ) { innerPadding ->
+        Column(
+            modifier = modifier.verticalScroll(rememberScrollState())
+        ) {
+            // Padding for the app bar
+            Spacer(Modifier.height(16.dp))
+            Column(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .clip(ClipShapes.outerRoundedCornerShape)
+            ) {
+                course.assignments.forEach { assignment ->
+                    AssignmentListItem(
+                        assignment = assignment,
+                        Modifier
+                            .padding(vertical = 1.dp)
+                            .clip(ClipShapes.innerRoundedCornerShape)
+                    )
+                }
+            }
+        }
+    }
 }

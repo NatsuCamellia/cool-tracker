@@ -14,11 +14,6 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.LoadingIndicator
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,53 +31,31 @@ import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 
-@Composable
-fun AssignmentScreen(
-    coolViewModel: CoolViewModel
-) {
-    coolViewModel.coolUiState.collectAsState().value.let { coolUiState ->
-        when (coolUiState) {
-            is CoolViewModel.CoolUiState.Error -> ErrorScreen { coolViewModel.loadCourses() }
-            is CoolViewModel.CoolUiState.Loading -> LoadingScreen()
-            is CoolViewModel.CoolUiState.Success -> SuccessScreen(coolUiState) { onDone ->
-                coolViewModel.loadCourses(onDone = onDone)
-            }
-        }
-    }
-}
-
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun SuccessScreen(
+fun AssignmentScreen(
     uiState: CoolViewModel.CoolUiState.Success,
     modifier: Modifier = Modifier,
-    onRefresh: (() -> Unit) -> Unit = {},
+    onRefresh: () -> Unit = {},
 ) {
-    var isRefreshing by remember { mutableStateOf(false) }
     val refreshState = rememberPullToRefreshState()
     val courses = uiState.courses
 
     PullToRefreshBox(
-        isRefreshing = isRefreshing,
-        onRefresh = {
-            isRefreshing = true
-            onRefresh { isRefreshing = false }
-        },
+        isRefreshing = uiState.isRefreshing,
+        onRefresh = onRefresh,
         state = refreshState,
         indicator = {
             LoadingIndicator(
                 state = refreshState,
-                isRefreshing = isRefreshing,
+                isRefreshing = uiState.isRefreshing,
                 modifier = Modifier.align(Alignment.TopCenter)
             )
         },
-        modifier = modifier
+        modifier = modifier.padding(horizontal = 16.dp)
     ) {
         // We use LazyColumn because the number of assignments of all courses may be large.
-        LazyColumn(
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-        ) {
+        LazyColumn {
             item {
                 SectionLabel(
                     text = stringResource(R.string.ongoing),
@@ -112,7 +85,6 @@ private fun SuccessScreen(
                 )
             }
         }
-
     }
 }
 

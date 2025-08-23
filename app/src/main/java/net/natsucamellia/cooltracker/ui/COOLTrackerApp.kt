@@ -18,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -27,6 +28,8 @@ import net.natsucamellia.cooltracker.ui.screens.AccountScreen
 import net.natsucamellia.cooltracker.ui.screens.AssignmentScreen
 import net.natsucamellia.cooltracker.ui.screens.CoolViewModel
 import net.natsucamellia.cooltracker.ui.screens.CourseScreen
+import net.natsucamellia.cooltracker.ui.screens.ErrorScreen
+import net.natsucamellia.cooltracker.ui.screens.LoadingScreen
 import net.natsucamellia.cooltracker.ui.screens.LoginWebViewScreen
 import net.natsucamellia.cooltracker.ui.screens.WelcomeScreen
 
@@ -85,6 +88,7 @@ fun LoggedInScreen(
     modifier: Modifier = Modifier,
     windowSizeClass: WindowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
 ) {
+    val uiState = coolViewModel.coolUiState.collectAsState().value
     val currentScreen = coolViewModel.currentScreen
     val navigationItems = listOf(
         NavigationItem.Courses,
@@ -142,10 +146,32 @@ fun LoggedInScreen(
                     }
                 }
             }
-            when (currentScreen) {
-                NavigationItem.Assignments -> AssignmentScreen(coolViewModel)
-                NavigationItem.Courses -> CourseScreen(coolViewModel)
-                NavigationItem.Account -> AccountScreen(coolViewModel)
+            when (uiState) {
+                is CoolViewModel.CoolUiState.Error -> {
+                    ErrorScreen(onRetry = coolViewModel::updateData)
+                }
+
+                is CoolViewModel.CoolUiState.Loading -> {
+                    LoadingScreen()
+                }
+
+                is CoolViewModel.CoolUiState.Success -> {
+                    when (currentScreen) {
+                        NavigationItem.Assignments -> AssignmentScreen(
+                            uiState = uiState,
+                            onRefresh = coolViewModel::updateData
+                        )
+
+                        NavigationItem.Courses -> CourseScreen(
+                            uiState = uiState
+                        )
+
+                        NavigationItem.Account -> AccountScreen(
+                            uiState = uiState,
+                            logout = coolViewModel::logout
+                        )
+                    }
+                }
             }
         }
     }
