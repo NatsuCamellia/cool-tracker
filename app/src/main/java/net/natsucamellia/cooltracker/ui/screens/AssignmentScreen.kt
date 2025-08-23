@@ -1,6 +1,7 @@
 package net.natsucamellia.cooltracker.ui.screens
 
 import android.content.Context
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -24,7 +25,6 @@ import net.natsucamellia.cooltracker.R
 import net.natsucamellia.cooltracker.model.Course
 import net.natsucamellia.cooltracker.model.chineseName
 import net.natsucamellia.cooltracker.model.englishName
-import net.natsucamellia.cooltracker.ui.theme.ClipShapes
 import net.natsucamellia.cooltracker.ui.widgets.AssignmentListItem
 import net.natsucamellia.cooltracker.ui.widgets.SectionLabel
 import kotlin.time.Clock
@@ -124,13 +124,15 @@ private fun CourseCard(
 
             Spacer(modifier = Modifier.height(8.dp))
             // Assignment list
-            Column(modifier = Modifier.clip(ClipShapes.outerRoundedCornerShape)) {
+            Column(
+                modifier = Modifier.clip(MaterialTheme.shapes.large),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
                 assignments.forEach { assignment ->
                     AssignmentListItem(
                         assignment = assignment,
-                        Modifier
-                            .padding(vertical = 1.dp)
-                            .clip(ClipShapes.innerRoundedCornerShape)
+                        modifier = Modifier
+                            .clip(MaterialTheme.shapes.extraSmall)
                     )
                 }
             }

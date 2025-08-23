@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import coil3.compose.AsyncImage
 import net.natsucamellia.cooltracker.R
-import net.natsucamellia.cooltracker.ui.theme.ClipShapes
 import net.natsucamellia.cooltracker.ui.widgets.SectionLabel
 
 @Composable
@@ -52,7 +51,7 @@ fun AccountScreen(
         Spacer(Modifier.height(8.dp))
         Column(
             verticalArrangement = Arrangement.spacedBy(2.dp),
-            modifier = Modifier.clip(ClipShapes.outerRoundedCornerShape)
+            modifier = Modifier.clip(MaterialTheme.shapes.large)
         ) {
             // Name and avatar
             ListItem(
@@ -72,7 +71,7 @@ fun AccountScreen(
                     )
                 },
                 modifier = Modifier
-                    .clip(ClipShapes.innerRoundedCornerShape)
+                    .clip(MaterialTheme.shapes.extraSmall)
                     .clickable(onClick = {})
             )
             // ID
@@ -80,7 +79,7 @@ fun AccountScreen(
                 headlineContent = { Text(stringResource(R.string.id)) },
                 supportingContent = { Text("${profile.id}") },
                 modifier = Modifier
-                    .clip(ClipShapes.innerRoundedCornerShape)
+                    .clip(MaterialTheme.shapes.extraSmall)
                     .clickable(onClick = {})
             )
             // Email
@@ -88,7 +87,7 @@ fun AccountScreen(
                 headlineContent = { Text(stringResource(R.string.email)) },
                 supportingContent = { Text(profile.primaryEmail) },
                 modifier = Modifier
-                    .clip(ClipShapes.innerRoundedCornerShape)
+                    .clip(MaterialTheme.shapes.extraSmall)
                     .clickable(onClick = {})
             )
             // Bio
@@ -96,7 +95,7 @@ fun AccountScreen(
                 headlineContent = { Text(stringResource(R.string.bio)) },
                 supportingContent = { Text(profile.bio ?: "You don't have a bio yet.") },
                 modifier = Modifier
-                    .clip(ClipShapes.innerRoundedCornerShape)
+                    .clip(MaterialTheme.shapes.extraSmall)
                     .clickable(onClick = {})
             )
             // Logout
@@ -108,7 +107,7 @@ fun AccountScreen(
                     )
                 },
                 modifier = Modifier
-                    .clip(ClipShapes.innerRoundedCornerShape)
+                    .clip(MaterialTheme.shapes.extraSmall)
                     .clickable(onClick = logout)
             )
         }
@@ -122,7 +121,7 @@ fun AccountScreen(
         Spacer(Modifier.height(8.dp))
         Column(
             verticalArrangement = Arrangement.spacedBy(2.dp),
-            modifier = Modifier.clip(ClipShapes.outerRoundedCornerShape)
+            modifier = Modifier.clip(MaterialTheme.shapes.large)
         ) {
             // Source Code
             val context = LocalContext.current
@@ -137,7 +136,7 @@ fun AccountScreen(
                     )
                 },
                 modifier = Modifier
-                    .clip(ClipShapes.innerRoundedCornerShape)
+                    .clip(MaterialTheme.shapes.extraSmall)
                     .clickable(onClick = { openGithub(context) })
             )
             // Version
@@ -145,7 +144,7 @@ fun AccountScreen(
                 headlineContent = { Text(stringResource(R.string.version)) },
                 supportingContent = { Text(getAppVersion(context)) },
                 modifier = Modifier
-                    .clip(ClipShapes.innerRoundedCornerShape)
+                    .clip(MaterialTheme.shapes.extraSmall)
                     .clickable(onClick = {})
             )
         }

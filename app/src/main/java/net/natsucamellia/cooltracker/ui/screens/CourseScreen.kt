@@ -46,7 +46,6 @@ import net.natsucamellia.cooltracker.R
 import net.natsucamellia.cooltracker.model.Course
 import net.natsucamellia.cooltracker.model.chineseName
 import net.natsucamellia.cooltracker.model.englishName
-import net.natsucamellia.cooltracker.ui.theme.ClipShapes
 import net.natsucamellia.cooltracker.ui.widgets.AssignmentListItem
 import net.natsucamellia.cooltracker.ui.widgets.SectionLabel
 
@@ -133,12 +132,13 @@ private fun CourseListScreen(
         Column(
             verticalArrangement = Arrangement.spacedBy(2.dp),
             modifier = Modifier
-                .clip(ClipShapes.outerRoundedCornerShape)
+                .clip(MaterialTheme.shapes.large)
         ) {
             uiState.courses.forEach {
                 CourseListItem(
                     course = it,
                     modifier = Modifier
+                        .clip(MaterialTheme.shapes.extraSmall)
                         .clickable(
                             onClick = { onCourseClick(it) }
                         )
@@ -228,14 +228,14 @@ private fun CourseDetailScreen(
             Column(
                 modifier = Modifier
                     .padding(innerPadding)
-                    .clip(ClipShapes.outerRoundedCornerShape)
+                    .clip(MaterialTheme.shapes.large)
             ) {
                 course.assignments.forEach { assignment ->
                     AssignmentListItem(
                         assignment = assignment,
                         Modifier
                             .padding(vertical = 1.dp)
-                            .clip(ClipShapes.innerRoundedCornerShape)
+                            .clip(MaterialTheme.shapes.extraSmall)
                     )
                 }
             }
