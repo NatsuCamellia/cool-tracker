@@ -14,7 +14,9 @@ data class AssignmentDTO(
     @SerializedName("created_at")
     val createdAt: String,
     val name: String,
-    val submission: SubmissionDTO
+    val submission: SubmissionDTO,
+    @SerializedName("html_url")
+    val htmlUrl: String
 )
 
 /**

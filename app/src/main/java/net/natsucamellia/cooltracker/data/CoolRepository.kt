@@ -211,7 +211,8 @@ class NetworkCoolRepository(
                         dueTime = Instant.parse(it.dueAt),
                         pointsPossible = it.pointsPossible,
                         createdTime = Instant.parse(it.createdAt),
-                        submitted = it.submission.workflowState != "unsubmitted"
+                        submitted = it.submission.workflowState != "unsubmitted",
+                        htmlUrl = it.htmlUrl
                     )
                 }
             }

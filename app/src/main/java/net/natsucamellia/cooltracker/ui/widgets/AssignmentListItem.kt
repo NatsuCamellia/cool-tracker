@@ -1,5 +1,9 @@
 package net.natsucamellia.cooltracker.ui.widgets
 
+import android.content.Context
+import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format
 import kotlinx.datetime.format.Padding
@@ -60,9 +65,12 @@ fun AssignmentListItem(
     val progress = if (durationTotal.isPositive())
         durationElapsed.toDouble(DurationUnit.MINUTES) / durationTotal.toDouble(DurationUnit.MINUTES)
     else 1.0
+    val context = LocalContext.current
 
     ListItem(
-        modifier = modifier,
+        modifier = modifier.clickable {
+            openUrl(context, assignment.htmlUrl)
+        },
         headlineContent = {
             Column {
                 Row(
@@ -128,4 +136,10 @@ fun AssignmentListItem(
             }
         }
     )
+}
+
+private fun openUrl(context: Context, url: String) {
+    val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+    intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
+    context.startActivity(intent)
 }

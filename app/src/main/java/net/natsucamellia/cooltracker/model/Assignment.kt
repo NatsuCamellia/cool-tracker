@@ -13,7 +13,8 @@ data class Assignment(
     val pointsPossible: Double,
     val createdTime: Instant,
     val name: String,
-    val submitted: Boolean
+    val submitted: Boolean,
+    val htmlUrl: String
 )
 
 @OptIn(ExperimentalTime::class)
@@ -23,5 +24,6 @@ val sampleAssignment: Assignment = Assignment(
     pointsPossible = 110.0,
     createdTime = Instant.parse("2025-05-14T06:10:50Z"),
     name = "Final Project",
-    submitted = true
+    submitted = true,
+    htmlUrl = "https://cool.ntu.edu.tw/"
 )
