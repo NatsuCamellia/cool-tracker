@@ -12,6 +12,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -93,32 +94,36 @@ fun LoggedInScreen(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
-    when (uiState) {
-        is CoolViewModel.CoolUiState.Error -> {
-            ErrorScreen(onRetry = coolViewModel::updateData)
-        }
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceContainer
+    ) {
+        when (uiState) {
+            is CoolViewModel.CoolUiState.Error -> {
+                ErrorScreen(onRetry = coolViewModel::updateData)
+            }
 
-        is CoolViewModel.CoolUiState.Loading -> {
-            LoadingScreen()
-        }
+            is CoolViewModel.CoolUiState.Loading -> {
+                LoadingScreen()
+            }
 
-        is CoolViewModel.CoolUiState.Success -> {
-            CoolNavigationWrapper(
-                currentDestination = currentDestination,
-                navigateToTopLevelDestination = { coolDestination ->
-                    navController.navigate(coolDestination.route)
-                },
-                modifier = Modifier.recalculateWindowInsets()
-            ) {
-                CoolNavHost(
-                    navController = navController,
-                    uiState = uiState,
-                    refresh = coolViewModel::updateData,
-                    logout = coolViewModel::logout,
-                    modifier = Modifier
-                        .windowInsetsPadding(WindowInsets.navigationBars)
-                        .windowInsetsPadding(WindowInsets.statusBars)
-                )
+            is CoolViewModel.CoolUiState.Success -> {
+                CoolNavigationWrapper(
+                    currentDestination = currentDestination,
+                    navigateToTopLevelDestination = { coolDestination ->
+                        navController.navigate(coolDestination.route)
+                    },
+                    modifier = Modifier.recalculateWindowInsets()
+                ) {
+                    CoolNavHost(
+                        navController = navController,
+                        uiState = uiState,
+                        refresh = coolViewModel::updateData,
+                        logout = coolViewModel::logout,
+                        modifier = Modifier
+                            .windowInsetsPadding(WindowInsets.navigationBars)
+                            .windowInsetsPadding(WindowInsets.statusBars)
+                    )
+                }
             }
         }
     }
