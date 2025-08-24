@@ -54,9 +54,9 @@ fun AccountScreen(
             modifier = Modifier.clip(MaterialTheme.shapes.large)
         ) {
             // Name and avatar
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.name)) },
-                supportingContent = { Text(profile.name) },
+            SettingListItem(
+                title = stringResource(R.string.name),
+                description = profile.name,
                 trailingContent = {
                     AsyncImage(
                         model = profile.avatarUrl ?: defaultAvatarUrl,
@@ -70,45 +70,26 @@ fun AccountScreen(
                             )
                     )
                 },
-                modifier = Modifier
-                    .clip(MaterialTheme.shapes.extraSmall)
-                    .clickable(onClick = {})
             )
             // ID
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.id)) },
-                supportingContent = { Text("${profile.id}") },
-                modifier = Modifier
-                    .clip(MaterialTheme.shapes.extraSmall)
-                    .clickable(onClick = {})
+            SettingListItem(
+                title = stringResource(R.string.id),
+                description = "${profile.id}"
             )
             // Email
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.email)) },
-                supportingContent = { Text(profile.primaryEmail) },
-                modifier = Modifier
-                    .clip(MaterialTheme.shapes.extraSmall)
-                    .clickable(onClick = {})
+            SettingListItem(
+                title = stringResource(R.string.email),
+                description = profile.primaryEmail
             )
             // Bio
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.bio)) },
-                supportingContent = { Text(profile.bio ?: "You don't have a bio yet.") },
-                modifier = Modifier
-                    .clip(MaterialTheme.shapes.extraSmall)
-                    .clickable(onClick = {})
+            SettingListItem(
+                title = stringResource(R.string.bio),
+                description = profile.bio ?: "You don't have a bio yet."
             )
             // Logout
-            ListItem(
-                headlineContent = {
-                    Text(
-                        text = stringResource(R.string.logout),
-                        color = MaterialTheme.colorScheme.error
-                    )
-                },
-                modifier = Modifier
-                    .clip(MaterialTheme.shapes.extraSmall)
-                    .clickable(onClick = logout)
+            SettingListItem(
+                title = stringResource(R.string.logout),
+                onClick = logout
             )
         }
 
@@ -125,9 +106,9 @@ fun AccountScreen(
         ) {
             // Source Code
             val context = LocalContext.current
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.source_code)) },
-                supportingContent = { Text(stringResource(R.string.source_code_desc)) },
+            SettingListItem(
+                title = stringResource(R.string.source_code),
+                description = stringResource(R.string.source_code_desc),
                 trailingContent = {
                     // Hint the user to open an external link
                     Icon(
@@ -135,20 +116,33 @@ fun AccountScreen(
                         contentDescription = stringResource(R.string.source_code_desc)
                     )
                 },
-                modifier = Modifier
-                    .clip(MaterialTheme.shapes.extraSmall)
-                    .clickable(onClick = { openGithub(context) })
+                onClick = { openGithub(context) }
             )
             // Version
-            ListItem(
-                headlineContent = { Text(stringResource(R.string.version)) },
-                supportingContent = { Text(getAppVersion(context)) },
-                modifier = Modifier
-                    .clip(MaterialTheme.shapes.extraSmall)
-                    .clickable(onClick = {})
+            SettingListItem(
+                title = stringResource(R.string.version),
+                description = getAppVersion(context)
             )
         }
     }
+}
+
+@Composable
+private fun SettingListItem(
+    title: String,
+    modifier: Modifier = Modifier,
+    description: String? = null,
+    trailingContent: @Composable (() -> Unit)? = null,
+    onClick: (() -> Unit) = {}
+) {
+    ListItem(
+        headlineContent = { Text(title) },
+        supportingContent = description?.let { { Text(description) } },
+        trailingContent = trailingContent,
+        modifier = modifier
+            .clip(MaterialTheme.shapes.extraSmall)
+            .clickable(onClick = onClick)
+    )
 }
 
 private fun openGithub(context: Context) {
