@@ -1,5 +1,8 @@
 package net.natsucamellia.cooltracker.ui.screens
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -86,7 +89,21 @@ fun CourseScreen(
     } else {
         // The screen is not wide enough, show stacked screens
         val navController = rememberNavController()
-        NavHost(navController, startDestination = "/", modifier = modifier) {
+        NavHost(
+            navController = navController,
+            startDestination = "/",
+            modifier = modifier,
+            enterTransition = {
+                fadeIn(
+                    animationSpec = tween(200)
+                )
+            },
+            exitTransition = {
+                fadeOut(
+                    animationSpec = tween(200)
+                )
+            }
+        ) {
             // Show the course list
             composable("/") {
                 CourseListScreen(

@@ -1,5 +1,8 @@
 package net.natsucamellia.cooltracker.ui
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -140,7 +143,17 @@ private fun CoolNavHost(
     NavHost(
         navController = navController,
         startDestination = CoolNavigationDestination.Courses.route,
-        modifier = modifier
+        modifier = modifier,
+        enterTransition = {
+            fadeIn(
+                animationSpec = tween(200)
+            )
+        },
+        exitTransition = {
+            fadeOut(
+                animationSpec = tween(200)
+            )
+        }
     ) {
         composable<Route.Courses> {
             CourseScreen(
