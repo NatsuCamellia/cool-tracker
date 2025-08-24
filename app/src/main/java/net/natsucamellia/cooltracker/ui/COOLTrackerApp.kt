@@ -31,10 +31,10 @@ import net.natsucamellia.cooltracker.nav.CoolNavigationDestination
 import net.natsucamellia.cooltracker.nav.CoolNavigationWrapper
 import net.natsucamellia.cooltracker.nav.Route
 import net.natsucamellia.cooltracker.ui.screens.AccountScreen
-import net.natsucamellia.cooltracker.ui.screens.AssignmentScreen
 import net.natsucamellia.cooltracker.ui.screens.CoolViewModel
 import net.natsucamellia.cooltracker.ui.screens.CourseScreen
 import net.natsucamellia.cooltracker.ui.screens.ErrorScreen
+import net.natsucamellia.cooltracker.ui.screens.HomeScreen
 import net.natsucamellia.cooltracker.ui.screens.LoadingScreen
 import net.natsucamellia.cooltracker.ui.screens.LoginWebViewScreen
 import net.natsucamellia.cooltracker.ui.screens.WelcomeScreen
@@ -142,7 +142,7 @@ private fun CoolNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = CoolNavigationDestination.Courses.route,
+        startDestination = CoolNavigationDestination.Home.route,
         modifier = modifier,
         enterTransition = {
             fadeIn(
@@ -161,7 +161,7 @@ private fun CoolNavHost(
             )
         }
         composable<Route.Assignments> {
-            AssignmentScreen(
+            HomeScreen(
                 uiState = uiState, onRefresh = refresh
             )
         }

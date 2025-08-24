@@ -11,9 +11,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.HourglassTop
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Clear
+import androidx.compose.material.icons.rounded.HourglassTop
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearWavyProgressIndicator
@@ -79,18 +79,19 @@ fun AssignmentListItem(
                 ) {
                     if (assignment.submitted) {
                         Icon(
-                            Icons.Default.Check,
+                            Icons.Rounded.Check,
                             contentDescription = "Submitted",
                             tint = MaterialTheme.colorScheme.primary
                         )
                     } else if (progress < 1.0) {
                         Icon(
-                            Icons.Default.HourglassTop,
+                            Icons.Rounded.HourglassTop,
                             contentDescription = "Unsubmitted",
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     } else {
                         Icon(
-                            Icons.Default.Clear,
+                            Icons.Rounded.Clear,
                             contentDescription = "Missing",
                             tint = MaterialTheme.colorScheme.error
                         )

@@ -1,11 +1,11 @@
 package net.natsucamellia.cooltracker.nav
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Assignment
-import androidx.compose.material.icons.automirrored.outlined.Assignment
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.School
 import androidx.compose.ui.graphics.vector.ImageVector
 import kotlinx.serialization.Serializable
@@ -35,10 +35,10 @@ sealed class CoolNavigationDestination(
         route = Route.Courses
     )
 
-    data object Assignments : CoolNavigationDestination(
-        selectedIcon = Icons.AutoMirrored.Filled.Assignment,
-        unselectedIcon = Icons.AutoMirrored.Outlined.Assignment,
-        titleResId = R.string.assignments,
+    data object Home : CoolNavigationDestination(
+        selectedIcon = Icons.Filled.Home,
+        unselectedIcon = Icons.Outlined.Home,
+        titleResId = R.string.home,
         route = Route.Assignments
     )
 
@@ -52,6 +52,6 @@ sealed class CoolNavigationDestination(
 
 val TOP_LEVEL_DESTINATIONS = listOf(
     CoolNavigationDestination.Courses,
-    CoolNavigationDestination.Assignments,
+    CoolNavigationDestination.Home,
     CoolNavigationDestination.Account
 )

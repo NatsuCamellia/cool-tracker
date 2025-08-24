@@ -22,6 +22,6 @@
     <string name="source_code">Source Code</string>
     <string name="version">Version</string>
     <string name="courses">Courses</string>
-    <string name="assignments">Assignments</string>
+    <string name="home">Home</string>
     <string name="source_code_desc">Check the source code on GitHub</string>
 </resources>
