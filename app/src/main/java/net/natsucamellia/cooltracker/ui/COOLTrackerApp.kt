@@ -1,29 +1,31 @@
 package net.natsucamellia.cooltracker.ui
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.recalculateWindowInsets
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationRail
-import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.window.core.layout.WindowSizeClass
-import net.natsucamellia.cooltracker.nav.NavigationItem
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import net.natsucamellia.cooltracker.nav.CoolNavigationDestination
+import net.natsucamellia.cooltracker.nav.CoolNavigationWrapper
+import net.natsucamellia.cooltracker.nav.Route
 import net.natsucamellia.cooltracker.ui.screens.AccountScreen
 import net.natsucamellia.cooltracker.ui.screens.AssignmentScreen
 import net.natsucamellia.cooltracker.ui.screens.CoolViewModel
@@ -84,95 +86,71 @@ fun InitScreen(modifier: Modifier = Modifier) {
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun LoggedInScreen(
-    coolViewModel: CoolViewModel,
-    modifier: Modifier = Modifier,
-    windowSizeClass: WindowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
+    coolViewModel: CoolViewModel
 ) {
     val uiState = coolViewModel.coolUiState.collectAsState().value
-    val currentScreen = coolViewModel.currentScreen
-    val navigationItems = listOf(
-        NavigationItem.Courses,
-        NavigationItem.Assignments,
-        NavigationItem.Account
-    )
-    val useNavigationRail = windowSizeClass
-        .isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
-    Scaffold(
-        bottomBar = {
-            if (!useNavigationRail) {
-                NavigationBar {
-                    navigationItems.forEach { screen ->
-                        NavigationBarItem(
-                            icon = {
-                                Icon(
-                                    if (currentScreen == screen) screen.filledIcon else screen.outlinedIcon,
-                                    contentDescription = stringResource(screen.titleResId)
-                                )
-                            },
-                            label = { Text(stringResource(screen.titleResId)) },
-                            selected = currentScreen == screen,
-                            onClick = { coolViewModel.currentScreen = screen }
-                        )
-                    }
-                }
+    val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
+
+    when (uiState) {
+        is CoolViewModel.CoolUiState.Error -> {
+            ErrorScreen(onRetry = coolViewModel::updateData)
+        }
+
+        is CoolViewModel.CoolUiState.Loading -> {
+            LoadingScreen()
+        }
+
+        is CoolViewModel.CoolUiState.Success -> {
+            CoolNavigationWrapper(
+                currentDestination = currentDestination,
+                navigateToTopLevelDestination = { coolDestination ->
+                    navController.navigate(coolDestination.route)
+                },
+                modifier = Modifier.recalculateWindowInsets()
+            ) {
+                CoolNavHost(
+                    navController = navController,
+                    uiState = uiState,
+                    refresh = coolViewModel::updateData,
+                    logout = coolViewModel::logout,
+                    modifier = Modifier
+                        .windowInsetsPadding(WindowInsets.navigationBars)
+                        .windowInsetsPadding(WindowInsets.statusBars)
+                )
             }
-        },
-        containerColor = MaterialTheme.colorScheme.surfaceContainer,
-        contentColor = contentColorFor(MaterialTheme.colorScheme.surfaceContainer),
+        }
+    }
+}
+
+@Composable
+private fun CoolNavHost(
+    navController: NavHostController,
+    uiState: CoolViewModel.CoolUiState.Success,
+    modifier: Modifier = Modifier,
+    refresh: () -> Unit = {},
+    logout: () -> Unit = {}
+) {
+    NavHost(
+        navController = navController,
+        startDestination = CoolNavigationDestination.Courses.route,
         modifier = modifier
-    ) { innerPadding ->
-        Row(
-            modifier = Modifier
-                .padding(innerPadding)
-                .consumeWindowInsets(innerPadding)
-        ) {
-            if (useNavigationRail) {
-                NavigationRail(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    contentColor = contentColorFor(MaterialTheme.colorScheme.surfaceContainer),
-                ) {
-                    navigationItems.forEach { screen ->
-                        NavigationRailItem(
-                            icon = {
-                                Icon(
-                                    if (currentScreen == screen) screen.filledIcon else screen.outlinedIcon,
-                                    contentDescription = stringResource(screen.titleResId)
-                                )
-                            },
-                            label = { Text(stringResource(screen.titleResId)) },
-                            selected = currentScreen == screen,
-                            onClick = { coolViewModel.currentScreen = screen }
-                        )
-                    }
-                }
-            }
-            when (uiState) {
-                is CoolViewModel.CoolUiState.Error -> {
-                    ErrorScreen(onRetry = coolViewModel::updateData)
-                }
-
-                is CoolViewModel.CoolUiState.Loading -> {
-                    LoadingScreen()
-                }
-
-                is CoolViewModel.CoolUiState.Success -> {
-                    when (currentScreen) {
-                        NavigationItem.Assignments -> AssignmentScreen(
-                            uiState = uiState,
-                            onRefresh = coolViewModel::updateData
-                        )
-
-                        NavigationItem.Courses -> CourseScreen(
-                            uiState = uiState
-                        )
-
-                        NavigationItem.Account -> AccountScreen(
-                            uiState = uiState,
-                            logout = coolViewModel::logout
-                        )
-                    }
-                }
-            }
+    ) {
+        composable<Route.Courses> {
+            CourseScreen(
+                uiState = uiState
+            )
+        }
+        composable<Route.Assignments> {
+            AssignmentScreen(
+                uiState = uiState, onRefresh = refresh
+            )
+        }
+        composable<Route.Account> {
+            AccountScreen(
+                uiState = uiState, logout = logout
+            )
         }
     }
 }

@@ -18,7 +18,6 @@ import net.natsucamellia.cooltracker.CoolApplication
 import net.natsucamellia.cooltracker.data.CoolRepository
 import net.natsucamellia.cooltracker.model.Course
 import net.natsucamellia.cooltracker.model.Profile
-import net.natsucamellia.cooltracker.nav.NavigationItem
 
 class CoolViewModel(
     private val coolRepository: CoolRepository,
@@ -27,7 +26,6 @@ class CoolViewModel(
     // are chosen at random. They can be changed if needed.
     var coolLoginState: CoolLoginState by mutableStateOf(CoolLoginState.Init)
         private set
-    var currentScreen: NavigationItem by mutableStateOf(NavigationItem.Assignments)
     private val courses = MutableStateFlow<List<Course>?>(null)
     private val profile = MutableStateFlow<Profile?>(null)
     private val isLoading = MutableStateFlow<Boolean>(false)
