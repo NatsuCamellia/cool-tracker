@@ -1,5 +1,8 @@
 package net.natsucamellia.cooltracker.ui.screens
 
+import android.content.Context
+import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -16,6 +19,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.OpenInNew
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -36,9 +40,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -197,6 +203,7 @@ private fun CourseDetailScreen(
     navigateUp: (() -> Unit)? = null
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val context = LocalContext.current
     Scaffold(
         topBar = {
             TwoRowsTopAppBar(
@@ -224,6 +231,16 @@ private fun CourseDetailScreen(
                                 contentDescription = "Back"
                             )
                         }
+                    }
+                },
+                actions = {
+                    IconButton(
+                        onClick = { openCourseInBrowser(context = context, courseId = course.id) }
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.OpenInNew,
+                            contentDescription = "Open in browser"
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -258,4 +275,11 @@ private fun CourseDetailScreen(
             }
         }
     }
+}
+
+private fun openCourseInBrowser(context: Context, courseId: Int) {
+    val url = "https://cool.ntu.edu.tw/courses/$courseId"
+    val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+    intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
+    context.startActivity(intent)
 }
