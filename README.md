@@ -1,6 +1,11 @@
 # COOL Tracker
 
 COOL Tracker 是一款專為 [NTU COOL](https://cool.ntu.edu.tw/) 設計的 Android 應用程式，讓使用者能輕鬆追蹤所有作業進度。
+<p align="center" width="100%">
+  <img width="30%" height="2400" alt="courses" src="https://github.com/user-attachments/assets/446e96c2-0de3-41c3-aeef-429d6294cc51" />
+  <img width="30%" height="2400" alt="course-detail" src="https://github.com/user-attachments/assets/340716cd-266d-4352-9299-910ca4791336" />
+  <img width="30%" height="2400" alt="assignments" src="https://github.com/user-attachments/assets/3c598a3d-13a6-4928-8fbc-478ba66136e1" />
+</p>
 
 ## 簡介
 ### 設計與技術
