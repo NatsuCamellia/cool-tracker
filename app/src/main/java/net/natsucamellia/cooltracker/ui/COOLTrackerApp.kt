@@ -16,27 +16,34 @@ import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import androidx.window.core.layout.WindowSizeClass
+import net.natsucamellia.cooltracker.model.Course
 import net.natsucamellia.cooltracker.nav.CoolNavigationDestination
 import net.natsucamellia.cooltracker.nav.CoolNavigationWrapper
 import net.natsucamellia.cooltracker.nav.Route
 import net.natsucamellia.cooltracker.ui.screens.AccountScreen
 import net.natsucamellia.cooltracker.ui.screens.CoolViewModel
-import net.natsucamellia.cooltracker.ui.screens.CourseScreen
+import net.natsucamellia.cooltracker.ui.screens.CourseDetailScreen
+import net.natsucamellia.cooltracker.ui.screens.CourseListScreen
 import net.natsucamellia.cooltracker.ui.screens.ErrorScreen
 import net.natsucamellia.cooltracker.ui.screens.HomeScreen
 import net.natsucamellia.cooltracker.ui.screens.LoadingScreen
 import net.natsucamellia.cooltracker.ui.screens.LoginWebViewScreen
+import net.natsucamellia.cooltracker.ui.screens.TwoPaneCourseView
 import net.natsucamellia.cooltracker.ui.screens.WelcomeScreen
 
 @Composable
@@ -140,6 +147,10 @@ private fun CoolNavHost(
     refresh: () -> Unit = {},
     logout: () -> Unit = {}
 ) {
+    val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
+    val twoPane =
+        windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
+
     NavHost(
         navController = navController,
         startDestination = CoolNavigationDestination.Home.route,
@@ -155,10 +166,42 @@ private fun CoolNavHost(
             )
         }
     ) {
-        composable<Route.Courses> {
-            CourseScreen(
-                uiState = uiState
-            )
+        composable<Route.Courses> { backStackEntry ->
+            val destination: Route.Courses = backStackEntry.toRoute()
+            val courseId = destination.courseId
+            val courses = uiState.courses
+            val onCourseClick: (Course) -> Unit = { course ->
+                navController.navigate(Route.Courses(courseId = course.id))
+            }
+
+            if (twoPane) {
+                TwoPaneCourseView(
+                    uiState = uiState,
+                    courseId = courseId,
+                    onCourseClick = onCourseClick,
+                    modifier = Modifier.padding(end = 16.dp)
+                )
+            } else {
+                if (courseId == null) {
+                    // Only course list
+                    CourseListScreen(
+                        uiState = uiState,
+                        onCourseClick = onCourseClick,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+                } else {
+                    // Only course detail
+                    val course = courses.find { course -> course.id == courseId }
+                    // Ideally this should never be null
+                    if (course != null) {
+                        CourseDetailScreen(
+                            course = course,
+                            navigateUp = { navController.navigateUp() },
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+                    }
+                }
+            }
         }
         composable<Route.Assignments> {
             HomeScreen(

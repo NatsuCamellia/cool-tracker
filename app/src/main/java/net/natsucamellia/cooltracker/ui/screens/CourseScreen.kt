@@ -3,9 +3,6 @@ package net.natsucamellia.cooltracker.ui.screens
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,30 +24,19 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TwoRowsTopAppBar
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
-import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import androidx.window.core.layout.WindowSizeClass
 import net.natsucamellia.cooltracker.R
 import net.natsucamellia.cooltracker.model.Course
 import net.natsucamellia.cooltracker.model.chineseName
@@ -59,88 +45,51 @@ import net.natsucamellia.cooltracker.ui.widgets.AssignmentListItem
 import net.natsucamellia.cooltracker.ui.widgets.SectionLabel
 
 @Composable
-fun CourseScreen(
+fun TwoPaneCourseView(
     uiState: CoolViewModel.CoolUiState.Success,
+    onCourseClick: (Course) -> Unit,
     modifier: Modifier = Modifier,
-    windowSizeClass: WindowSizeClass = currentWindowAdaptiveInfo().windowSizeClass,
+    courseId: Int? = null
 ) {
-    val splitScreen =
-        windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
+    val selectedCourse = uiState.courses.find { course -> course.id == courseId }
 
-    if (splitScreen) {
-        var selectedCourse by remember { mutableStateOf<Course?>(null) }
-        Row(modifier = modifier.padding(horizontal = 16.dp)) {
-            // Left for course list
-            CourseListScreen(
-                uiState = uiState,
-                onCourseClick = { selectedCourse = it },
-                modifier = Modifier.weight(4f)
-            )
-            // and right for course detail
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .weight(5f)
-            ) {
-                val course = selectedCourse
-                if (course != null) {
-                    CourseDetailScreen(
-                        course = course,
-                        modifier = Modifier
-                            .padding(start = 16.dp)
-                    )
-                }
+    Row(modifier = modifier) {
+        // Left for course detail
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .weight(5f)
+        ) {
+            val course = selectedCourse
+            if (course != null) {
+                CourseDetailScreen(
+                    course = course,
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                )
             }
         }
-    } else {
-        // The screen is not wide enough, show stacked screens
-        val navController = rememberNavController()
-        NavHost(
-            navController = navController,
-            startDestination = "/",
-            modifier = modifier,
-            enterTransition = {
-                fadeIn(
-                    animationSpec = tween(200)
-                )
-            },
-            exitTransition = {
-                fadeOut(
-                    animationSpec = tween(200)
-                )
-            }
+        // and right for course list
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceBright,
+            modifier = Modifier
+                .weight(4f)
+                .clip(MaterialTheme.shapes.extraLarge)
         ) {
-            // Show the course list
-            composable("/") {
-                CourseListScreen(
-                    uiState = uiState,
-                    onCourseClick = { navController.navigate("/${it.id}") },
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-            }
-            // Show the assignment list of a course
-            composable(
-                route = "/{courseId}",
-                arguments = listOf(navArgument("courseId") { type = NavType.IntType })
-            ) {
-                val courseId = it.arguments?.getInt("courseId")
-                val course = uiState.courses.find { course -> course.id == courseId }
-                // Ideally this should never be null
-                if (course != null) {
-                    CourseDetailScreen(
-                        course = course,
-                        navigateUp = { navController.navigateUp() },
-                        modifier = Modifier.padding(horizontal = 16.dp)
-                    )
-                }
-            }
+            CourseListScreen(
+                uiState = uiState,
+                onCourseClick = onCourseClick,
+                modifier = Modifier
+                    .padding(16.dp)
+                    .clip(MaterialTheme.shapes.large)
+            )
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
-private fun CourseListScreen(
+fun CourseListScreen(
     uiState: CoolViewModel.CoolUiState.Success,
     modifier: Modifier = Modifier,
     onCourseClick: (Course) -> Unit = {}
@@ -197,19 +146,18 @@ private fun CourseListItem(
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun CourseDetailScreen(
+fun CourseDetailScreen(
     course: Course,
     modifier: Modifier = Modifier,
     navigateUp: (() -> Unit)? = null
 ) {
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val context = LocalContext.current
     Scaffold(
         topBar = {
-            TwoRowsTopAppBar(
+            TopAppBar(
                 title = {
                     Text(
-                        course.courseCode,
+                        course.chineseName,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -245,14 +193,11 @@ private fun CourseDetailScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainer
-                ),
-                scrollBehavior = scrollBehavior
+                )
             )
         },
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
-        contentColor = contentColorFor(MaterialTheme.colorScheme.surfaceContainer),
-        modifier = Modifier
-            .nestedScroll(scrollBehavior.nestedScrollConnection)
+        contentColor = contentColorFor(MaterialTheme.colorScheme.surfaceContainer)
     ) { innerPadding ->
         Column(
             modifier = modifier.verticalScroll(rememberScrollState())

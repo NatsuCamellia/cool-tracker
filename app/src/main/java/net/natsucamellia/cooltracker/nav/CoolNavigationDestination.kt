@@ -13,7 +13,7 @@ import net.natsucamellia.cooltracker.R
 
 sealed interface Route {
     @Serializable
-    object Courses : Route
+    class Courses(val courseId: Int? = null) : Route
 
     @Serializable
     object Assignments : Route
@@ -32,7 +32,7 @@ sealed class CoolNavigationDestination(
         selectedIcon = Icons.Filled.School,
         unselectedIcon = Icons.Outlined.School,
         titleResId = R.string.courses,
-        route = Route.Courses
+        route = Route.Courses()
     )
 
     data object Home : CoolNavigationDestination(
