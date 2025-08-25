@@ -16,7 +16,7 @@ import net.natsucamellia.cooltracker.model.Profile
     version = 1
 )
 @TypeConverters(Converters::class)
-abstract class ProfileDatabase : RoomDatabase() {
+abstract class CoolDatabase : RoomDatabase() {
     abstract fun profileDao(): ProfileDao
     abstract fun courseWithAssignmentsDao(): CourseWithAssignmentsDao
 }

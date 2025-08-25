@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.room.Room
 import net.natsucamellia.cooltracker.auth.AuthManager
 import net.natsucamellia.cooltracker.data.local.LocalCoolDataProviderImpl
-import net.natsucamellia.cooltracker.data.local.db.ProfileDatabase
+import net.natsucamellia.cooltracker.data.local.db.CoolDatabase
 import net.natsucamellia.cooltracker.network.CoolApiService
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -33,18 +33,18 @@ class DefaultAppContainer(
         )
     }
 
-    private val profileDatabase by lazy {
+    private val coolDatabase by lazy {
         Room.databaseBuilder(
             application.applicationContext,
-            ProfileDatabase::class.java,
+            CoolDatabase::class.java,
             "profile"
         ).build()
     }
 
     private val localCoolDataProvider by lazy {
         LocalCoolDataProviderImpl(
-            profileDao = profileDatabase.profileDao(),
-            courseWithAssignmentsDao = profileDatabase.courseWithAssignmentsDao()
+            profileDao = coolDatabase.profileDao(),
+            courseWithAssignmentsDao = coolDatabase.courseWithAssignmentsDao()
         )
     }
 
