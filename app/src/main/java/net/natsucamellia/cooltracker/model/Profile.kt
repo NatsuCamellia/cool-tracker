@@ -1,9 +1,14 @@
 package net.natsucamellia.cooltracker.model
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
 /**
  * @sample [sampleProfile]
  */
+@Entity(tableName = "profile_table")
 data class Profile(
+    @PrimaryKey
     val id: Int,
     val name: String,
     val bio: String?,

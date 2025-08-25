@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import net.natsucamellia.cooltracker.auth.AuthManager
 import net.natsucamellia.cooltracker.auth.LoginState
+import net.natsucamellia.cooltracker.data.local.LocalCoolDataProvider
 import net.natsucamellia.cooltracker.model.Course
 import net.natsucamellia.cooltracker.model.Profile
 
@@ -27,17 +28,27 @@ interface CoolRepository {
 }
 
 class NetworkCoolRepository(
-    private val remoteCoolDataProvider: RemoteCoolDataProvider, private val authManager: AuthManager
+    private val localCoolDataProvider: LocalCoolDataProvider,
+    private val remoteCoolDataProvider: RemoteCoolDataProvider,
+    private val authManager: AuthManager
 ) : CoolRepository {
-    private var userSessionCookies: String? = null
 
     init {
         CoroutineScope(Dispatchers.IO).launch {
-            authManager.loginState.collect {
-                userSessionCookies = if (it is LoginState.LoggedIn) {
-                    it.cookies
-                } else {
-                    null
+            authManager.loginState.collect { state ->
+                when (state) {
+                    is LoginState.LoggedIn -> {
+                        val profile = remoteCoolDataProvider.getUserProfile(state.cookies)
+                        if (profile != null) {
+                            localCoolDataProvider.saveProfile(profile)
+                        }
+                    }
+
+                    is LoginState.LoggedOut -> {
+                        localCoolDataProvider.clearAll()
+                    }
+
+                    else -> {}
                 }
             }
         }
@@ -48,19 +59,7 @@ class NetworkCoolRepository(
      * @return user's profile information flow, null flow if failed.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
-    override fun getUserProfile(): Flow<Profile?> = authManager.loginState.flatMapLatest { state ->
-        when (state) {
-            is LoginState.LoggedIn -> {
-                val cookies = state.cookies
-                val profile = remoteCoolDataProvider.getUserProfile(cookies)
-                flowOf(profile)
-            }
-
-            else -> {
-                flowOf(null)
-            }
-        }
-    }
+    override fun getUserProfile(): Flow<Profile?> = localCoolDataProvider.getProfile()
 
     /**
      * Get the current user's active courses from NTU COOL API.
