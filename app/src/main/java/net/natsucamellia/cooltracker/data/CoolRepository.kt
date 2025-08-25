@@ -4,8 +4,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import net.natsucamellia.cooltracker.auth.AuthManager
 import net.natsucamellia.cooltracker.auth.LoginState
@@ -25,6 +23,8 @@ interface CoolRepository {
      * @return list of active courses, null if failed.
      */
     fun getActiveCoursesWithAssignments(): Flow<List<CourseWithAssignments>?>
+
+    fun refresh(onDone: () -> Unit = {})
 }
 
 class NetworkCoolRepository(
@@ -38,10 +38,7 @@ class NetworkCoolRepository(
             authManager.loginState.collect { state ->
                 when (state) {
                     is LoginState.LoggedIn -> {
-                        val profile = remoteCoolDataProvider.getUserProfile(state.cookies)
-                        if (profile != null) {
-                            localCoolDataProvider.saveProfile(profile)
-                        }
+                        refresh(state.cookies)
                     }
 
                     is LoginState.LoggedOut -> {
@@ -67,18 +64,27 @@ class NetworkCoolRepository(
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun getActiveCoursesWithAssignments(): Flow<List<CourseWithAssignments>?> =
-        authManager.loginState.flatMapLatest { state ->
-            when (state) {
-                is LoginState.LoggedIn -> {
-                    val cookies = state.cookies
-                    val courses = remoteCoolDataProvider.getActiveCoursesWithAssignments(cookies)
-                    flowOf(courses)
-                }
+        localCoolDataProvider.getCoursesWithAssignments()
 
-                else -> {
-                    flowOf(null)
-                }
+    override fun refresh(onDone: () -> Unit) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val state = authManager.loginState.value
+            if (state is LoginState.LoggedIn) {
+                refresh(state.cookies)
             }
+            onDone()
         }
+    }
 
+    private suspend fun refresh(cookies: String) {
+        val profile = remoteCoolDataProvider.getUserProfile(cookies)
+        if (profile != null) {
+            localCoolDataProvider.saveProfile(profile)
+        }
+        val coursesWithAssignments =
+            remoteCoolDataProvider.getActiveCoursesWithAssignments(cookies)
+        if (coursesWithAssignments != null) {
+            localCoolDataProvider.saveCoursesWithAssignments(coursesWithAssignments)
+        }
+    }
 }

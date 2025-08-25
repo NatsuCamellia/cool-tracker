@@ -111,6 +111,7 @@ class RemoteCoolDataProviderImpl(
                 } else {
                     Assignment(
                         id = it.id,
+                        courseId = it.courseId,
                         name = it.name,
                         dueTime = Instant.parse(it.dueAt),
                         pointsPossible = it.pointsPossible,

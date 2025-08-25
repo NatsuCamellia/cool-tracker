@@ -11,6 +11,7 @@ data class AssignmentDTO(
     @SerializedName("points_possible") val pointsPossible: Double,
     @SerializedName("created_at") val createdAt: String,
     @SerializedName("name") val name: String,
+    @SerializedName("course_id") val courseId: Int,
     @SerializedName("submission") val submission: SubmissionDTO,
     @SerializedName("html_url") val htmlUrl: String
 )

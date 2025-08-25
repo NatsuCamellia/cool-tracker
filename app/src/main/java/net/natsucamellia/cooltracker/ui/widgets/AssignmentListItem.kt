@@ -36,9 +36,8 @@ import net.natsucamellia.cooltracker.model.Assignment
 import net.natsucamellia.cooltracker.ui.screens.formatDurationLargestTwoUnits
 import kotlin.time.Clock
 import kotlin.time.DurationUnit
-import kotlin.time.ExperimentalTime
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalTime::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AssignmentListItem(
     assignment: Assignment,

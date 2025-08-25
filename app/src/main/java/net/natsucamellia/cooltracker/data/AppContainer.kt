@@ -43,7 +43,8 @@ class DefaultAppContainer(
 
     private val localCoolDataProvider by lazy {
         LocalCoolDataProviderImpl(
-            profileDao = profileDatabase.profileDao()
+            profileDao = profileDatabase.profileDao(),
+            courseWithAssignmentsDao = profileDatabase.courseWithAssignmentsDao()
         )
     }
 

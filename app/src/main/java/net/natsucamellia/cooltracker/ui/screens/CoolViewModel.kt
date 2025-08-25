@@ -75,12 +75,13 @@ class CoolViewModel(
     fun updateData(
         onDone: () -> Unit = {}
     ) {
-        viewModelScope.launch {
-            isLoading.update { true }
-            // TODO: Implement refresh after local source is implemented.
-            isLoading.update { false }
-            onDone()
-        }
+        isLoading.update { true }
+        coolRepository.refresh(
+            onDone = {
+                isLoading.update { false }
+                onDone()
+            }
+        )
     }
 
     /**
