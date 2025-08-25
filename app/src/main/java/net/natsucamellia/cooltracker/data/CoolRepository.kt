@@ -3,9 +3,13 @@ package net.natsucamellia.cooltracker.data
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import net.natsucamellia.cooltracker.auth.AuthManager
 import net.natsucamellia.cooltracker.auth.LoginState
@@ -21,13 +25,13 @@ interface CoolRepository {
      * Get the current user's profile information.
      * @return user's profile information, null if failed.
      */
-    suspend fun getUserProfile(): Profile?
+    fun getUserProfile(): Flow<Profile?>
 
     /**
      * Get the current user's active courses.
      * @return list of active courses, null if failed.
      */
-    suspend fun getActiveCourses(): List<Course>?
+    fun getActiveCourses(): Flow<List<Course>?>
 }
 
 class NetworkCoolRepository(
@@ -50,78 +54,102 @@ class NetworkCoolRepository(
 
     /**
      * Get the current user's profile information from NTU COOL API.
-     * @return user's profile information, null if failed.
+     * @return user's profile information flow, null flow if failed.
      */
-    override suspend fun getUserProfile(): Profile? {
-        val cookies = userSessionCookies
-        if (cookies == null) {
-            return null
-        }
-        val response = coolApiService.getCurrentUserProfile(cookies)
-        return if (response.isSuccessful) {
-            val profileDTO = response.body()
-            if (profileDTO == null) {
-                // Empty response body, probably failed
-                return null
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun getUserProfile(): Flow<Profile?> = authManager.loginState.flatMapLatest { state ->
+        when (state) {
+            is LoginState.LoggedIn -> {
+                val cookies = state.cookies
+                val profile = getRemoteProfile(cookies)
+                flowOf(profile)
             }
-            Profile(
-                id = profileDTO.id,
-                name = profileDTO.name,
-                bio = profileDTO.bio,
-                primaryEmail = profileDTO.primaryEmail,
-                avatarUrl = profileDTO.avatarUrl
-            )
-        } else {
-            // The request failed
-            Log.d("NetworkCoolRepository", "getCurrentUserProfile: $response")
-            Log.e("NetworkCoolRepository", "getCurrentUserProfile: ${response.errorBody()}")
-            null
+
+            else -> {
+                flowOf(null)
+            }
         }
     }
 
     /**
      * Get the current user's active courses from NTU COOL API.
-     * @return list of active courses, null if failed.
+     * @return list of active courses flow, null flow if failed.
      */
-    override suspend fun getActiveCourses(): List<Course>? {
-        val cookies = userSessionCookies
-        if (cookies == null) {
-            return null
-        }
-        val response = coolApiService.getActiveCourses(cookies)
-        return if (response.isSuccessful) {
-            val courseDTOs = response.body()
-            if (courseDTOs == null) {
-                // Empty response body, probably failed
-                return null
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun getActiveCourses(): Flow<List<Course>?> =
+        authManager.loginState.flatMapLatest { state ->
+            when (state) {
+                is LoginState.LoggedIn -> {
+                    val cookies = state.cookies
+                    val courses = getRemoteActiveCourses(cookies)
+                    flowOf(courses)
+                }
+
+                else -> {
+                    flowOf(null)
+                }
             }
-            coroutineScope {
-                // Get assignments for each course, asynchronously, for faster result.
-                // Map the courses to Jobs and wait all the results.
-                courseDTOs.map {
-                    async {
-                        val assignments = getCourseAssignments(it.id)
-                        if (assignments != null) {
-                            Course(
-                                id = it.id,
-                                name = it.name,
-                                isPublic = it.isPublic,
-                                courseCode = it.courseCode,
-                                assignments = assignments
-                            )
-                        } else {
-                            // Failed to get assignments
-                            null
-                        }
-                    }
-                }.awaitAll()
-                    // Drop those failed jobs
-                    .filterNotNull()
+        }
+
+    private suspend fun getRemoteProfile(cookies: String): Profile? {
+        val response = coolApiService.getCurrentUserProfile(cookies)
+        return if (response.isSuccessful) {
+            val profileDTO = response.body()
+            if (profileDTO != null) {
+                Profile(
+                    id = profileDTO.id,
+                    name = profileDTO.name,
+                    bio = profileDTO.bio,
+                    primaryEmail = profileDTO.primaryEmail,
+                    avatarUrl = profileDTO.avatarUrl
+                )
+            } else {
+                null
             }
         } else {
             // The request failed
-            Log.d("NetworkCoolRepository", "getActiveCourses: $response")
-            Log.e("NetworkCoolRepository", "getActiveCourses: ${response.errorBody()}")
+            Log.d("NetworkCoolRepository", "getRemoteProfile: $response")
+            Log.e("NetworkCoolRepository", "getRemoteProfile: ${response.errorBody()}")
+            null
+        }
+    }
+
+    private suspend fun getRemoteActiveCourses(cookies: String): List<Course>? {
+        val response = coolApiService.getActiveCourses(cookies)
+        return if (response.isSuccessful) {
+            val courseDTOs = response.body()
+            if (courseDTOs != null) {
+                coroutineScope {
+                    // Get assignments for each course, asynchronously, for faster result.
+                    // Map the courses to Jobs and wait all the results.
+                    courseDTOs.map {
+                        async {
+                            val assignments = getRemoteCourseAssignments(it.id)
+                            if (assignments != null) {
+                                Course(
+                                    id = it.id,
+                                    name = it.name,
+                                    isPublic = it.isPublic,
+                                    courseCode = it.courseCode,
+                                    assignments = assignments
+                                )
+                            } else {
+                                // Failed to get assignments
+                                null
+                            }
+                        }
+                    }.awaitAll()
+                        // Drop those failed jobs
+                        .filterNotNull()
+                }
+            } else {
+                // Empty response body, probably failed
+                null
+            }
+        } else {
+            // The request failed
+            Log.d("NetworkCoolRepository", "getRemoteActiveCourses: $response")
+            Log.e("NetworkCoolRepository", "getRemoteActiveCourses: ${response.errorBody()}")
             null
         }
     }
@@ -131,7 +159,7 @@ class NetworkCoolRepository(
      * @return list of assignments, null if failed.
      */
     @OptIn(ExperimentalTime::class)
-    private suspend fun getCourseAssignments(courseId: Int): List<Assignment>? {
+    private suspend fun getRemoteCourseAssignments(courseId: Int): List<Assignment>? {
         val cookies = userSessionCookies
         if (cookies == null) {
             return null
@@ -167,11 +195,5 @@ class NetworkCoolRepository(
             Log.e("NetworkCoolRepository", "getCourseAssignments: ${response.errorBody()}")
             null
         }
-    }
-
-    companion object {
-        private const val TAG = "NetworkCoolRepository"
-        private const val KEY_ENCRYPTED_COOKIES = "encrypted_cool_cookies"
-        private const val KEY_IV = "cool_cookies_iv"
     }
 }

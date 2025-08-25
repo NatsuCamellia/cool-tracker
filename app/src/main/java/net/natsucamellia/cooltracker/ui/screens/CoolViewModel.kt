@@ -26,10 +26,12 @@ class CoolViewModel(
     private val authManager: AuthManager
 ) : ViewModel() {
     var coolLoginState: CoolLoginState by mutableStateOf(CoolLoginState.Init)
-    private val courses = MutableStateFlow<List<Course>?>(null)
-    private val profile = MutableStateFlow<Profile?>(null)
     private val isLoading = MutableStateFlow(false)
-    val coolUiState = combine(courses, profile, isLoading) { courses, profile, isLoading ->
+    val coolUiState = combine(
+        coolRepository.getActiveCourses(),
+        coolRepository.getUserProfile(),
+        isLoading
+    ) { courses, profile, isLoading ->
         if (isLoading && (courses == null || profile == null)) {
             // Only show loading when loading data for the first time
             // or when the data is still null.
@@ -75,8 +77,7 @@ class CoolViewModel(
     ) {
         viewModelScope.launch {
             isLoading.update { true }
-            courses.update { coolRepository.getActiveCourses() }
-            profile.update { coolRepository.getUserProfile() }
+            // TODO: Implement refresh after local source is implemented.
             isLoading.update { false }
             onDone()
         }
