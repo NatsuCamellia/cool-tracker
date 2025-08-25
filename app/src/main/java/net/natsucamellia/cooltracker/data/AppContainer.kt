@@ -30,9 +30,15 @@ class DefaultAppContainer(
         )
     }
 
+    private val remoteCoolDataProvider by lazy {
+        RemoteCoolDataProviderImpl(
+            coolApiService = retrofitService
+        )
+    }
+
     override val coolRepository: CoolRepository by lazy {
         NetworkCoolRepository(
-            coolApiService =  retrofitService,
+            remoteCoolDataProvider = remoteCoolDataProvider,
             authManager = authManager
         )
     }
