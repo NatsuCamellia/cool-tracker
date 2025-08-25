@@ -1,14 +1,14 @@
-package net.natsucamellia.cooltracker.data
+package net.natsucamellia.cooltracker.data.remote
 
 import android.util.Log
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import net.natsucamellia.cooltracker.data.remote.api.CoolApiService
 import net.natsucamellia.cooltracker.model.Assignment
 import net.natsucamellia.cooltracker.model.Course
 import net.natsucamellia.cooltracker.model.CourseWithAssignments
 import net.natsucamellia.cooltracker.model.Profile
-import net.natsucamellia.cooltracker.network.CoolApiService
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 

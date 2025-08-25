@@ -5,7 +5,8 @@ import androidx.room.Room
 import net.natsucamellia.cooltracker.auth.AuthManager
 import net.natsucamellia.cooltracker.data.local.LocalCoolDataProviderImpl
 import net.natsucamellia.cooltracker.data.local.db.CoolDatabase
-import net.natsucamellia.cooltracker.network.CoolApiService
+import net.natsucamellia.cooltracker.data.remote.RemoteCoolDataProviderImpl
+import net.natsucamellia.cooltracker.data.remote.api.CoolApiService
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 

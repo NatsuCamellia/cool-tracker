@@ -1,5 +1,8 @@
-package net.natsucamellia.cooltracker.network
+package net.natsucamellia.cooltracker.data.remote.api
 
+import net.natsucamellia.cooltracker.data.remote.dto.AssignmentDTO
+import net.natsucamellia.cooltracker.data.remote.dto.CourseDTO
+import net.natsucamellia.cooltracker.data.remote.dto.ProfileDTO
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Header

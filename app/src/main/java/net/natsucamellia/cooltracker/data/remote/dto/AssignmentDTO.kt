@@ -1,4 +1,4 @@
-package net.natsucamellia.cooltracker.network
+package net.natsucamellia.cooltracker.data.remote.dto
 
 import com.google.gson.annotations.SerializedName
 

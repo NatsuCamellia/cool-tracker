@@ -8,6 +8,7 @@ import kotlinx.coroutines.launch
 import net.natsucamellia.cooltracker.auth.AuthManager
 import net.natsucamellia.cooltracker.auth.LoginState
 import net.natsucamellia.cooltracker.data.local.LocalCoolDataProvider
+import net.natsucamellia.cooltracker.data.remote.RemoteCoolDataProvider
 import net.natsucamellia.cooltracker.model.CourseWithAssignments
 import net.natsucamellia.cooltracker.model.Profile
 
