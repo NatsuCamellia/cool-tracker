@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import net.natsucamellia.cooltracker.R
 import net.natsucamellia.cooltracker.model.Course
+import net.natsucamellia.cooltracker.model.CourseWithAssignments
 import net.natsucamellia.cooltracker.model.chineseName
 import net.natsucamellia.cooltracker.model.englishName
 import net.natsucamellia.cooltracker.ui.widgets.AssignmentListItem
@@ -46,12 +47,12 @@ import net.natsucamellia.cooltracker.ui.widgets.SectionLabel
 
 @Composable
 fun TwoPaneCourseView(
-    uiState: CoolViewModel.CoolUiState.Success,
+    coursesWithAssignments: List<CourseWithAssignments>,
     onCourseClick: (Course) -> Unit,
     modifier: Modifier = Modifier,
     courseId: Int? = null
 ) {
-    val selectedCourse = uiState.courses.find { course -> course.id == courseId }
+    val selectedCourse = coursesWithAssignments.find { it.course.id == courseId }
 
     Row(modifier = modifier) {
         // Left for course detail
@@ -63,7 +64,7 @@ fun TwoPaneCourseView(
             val course = selectedCourse
             if (course != null) {
                 CourseDetailScreen(
-                    course = course,
+                    courseWithAssignments = course,
                     modifier = Modifier
                         .padding(horizontal = 16.dp)
                 )
@@ -77,7 +78,7 @@ fun TwoPaneCourseView(
                 .clip(MaterialTheme.shapes.extraLarge)
         ) {
             CourseListScreen(
-                uiState = uiState,
+                coursesWithAssignments = coursesWithAssignments,
                 onCourseClick = onCourseClick,
                 modifier = Modifier
                     .padding(16.dp)
@@ -90,7 +91,7 @@ fun TwoPaneCourseView(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun CourseListScreen(
-    uiState: CoolViewModel.CoolUiState.Success,
+    coursesWithAssignments: List<CourseWithAssignments>,
     modifier: Modifier = Modifier,
     onCourseClick: (Course) -> Unit = {}
 ) {
@@ -106,13 +107,13 @@ fun CourseListScreen(
             modifier = Modifier
                 .clip(MaterialTheme.shapes.large)
         ) {
-            uiState.courses.forEach {
+            coursesWithAssignments.forEach {
                 CourseListItem(
-                    course = it,
+                    course = it.course,
                     modifier = Modifier
                         .clip(MaterialTheme.shapes.extraSmall)
                         .clickable(
-                            onClick = { onCourseClick(it) }
+                            onClick = { onCourseClick(it.course) }
                         )
                 )
             }
@@ -147,11 +148,13 @@ private fun CourseListItem(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun CourseDetailScreen(
-    course: Course,
+    courseWithAssignments: CourseWithAssignments,
     modifier: Modifier = Modifier,
     navigateUp: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
+    val course = courseWithAssignments.course
+    val assignments = courseWithAssignments.assignments
     Scaffold(
         topBar = {
             TopAppBar(
@@ -209,7 +212,7 @@ fun CourseDetailScreen(
                     .padding(innerPadding)
                     .clip(MaterialTheme.shapes.large)
             ) {
-                course.assignments.forEach { assignment ->
+                assignments.forEach { assignment ->
                     AssignmentListItem(
                         assignment = assignment,
                         Modifier

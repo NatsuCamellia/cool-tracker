@@ -18,7 +18,7 @@ import net.natsucamellia.cooltracker.CoolApplication
 import net.natsucamellia.cooltracker.auth.AuthManager
 import net.natsucamellia.cooltracker.auth.LoginState
 import net.natsucamellia.cooltracker.data.CoolRepository
-import net.natsucamellia.cooltracker.model.Course
+import net.natsucamellia.cooltracker.model.CourseWithAssignments
 import net.natsucamellia.cooltracker.model.Profile
 
 class CoolViewModel(
@@ -28,7 +28,7 @@ class CoolViewModel(
     var coolLoginState: CoolLoginState by mutableStateOf(CoolLoginState.Init)
     private val isLoading = MutableStateFlow(false)
     val coolUiState = combine(
-        coolRepository.getActiveCourses(),
+        coolRepository.getActiveCoursesWithAssignments(),
         coolRepository.getUserProfile(),
         isLoading
     ) { courses, profile, isLoading ->
@@ -132,7 +132,7 @@ class CoolViewModel(
          * When refreshing, the state should be in [Success] since the data is already loaded.
          */
         data class Success(
-            val courses: List<Course>,
+            val coursesWithAssignments: List<CourseWithAssignments>,
             val profile: Profile,
             val isRefreshing: Boolean
         ) : CoolUiState

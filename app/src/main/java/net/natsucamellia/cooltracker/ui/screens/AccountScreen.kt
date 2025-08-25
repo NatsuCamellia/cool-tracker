@@ -38,17 +38,17 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import coil3.compose.AsyncImage
 import net.natsucamellia.cooltracker.R
+import net.natsucamellia.cooltracker.model.Profile
 import net.natsucamellia.cooltracker.ui.widgets.SectionLabel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountScreen(
-    uiState: CoolViewModel.CoolUiState.Success,
+    profile: Profile,
     logout: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showLogoutDialog by remember { mutableStateOf(false) }
-    val profile = uiState.profile
     Column(
         modifier = modifier
             .padding(horizontal = 16.dp)

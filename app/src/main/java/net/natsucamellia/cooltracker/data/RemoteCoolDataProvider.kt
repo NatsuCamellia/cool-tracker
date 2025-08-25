@@ -6,6 +6,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import net.natsucamellia.cooltracker.model.Assignment
 import net.natsucamellia.cooltracker.model.Course
+import net.natsucamellia.cooltracker.model.CourseWithAssignments
 import net.natsucamellia.cooltracker.model.Profile
 import net.natsucamellia.cooltracker.network.CoolApiService
 import kotlin.time.ExperimentalTime
@@ -13,7 +14,7 @@ import kotlin.time.Instant
 
 interface RemoteCoolDataProvider {
     suspend fun getUserProfile(cookies: String): Profile?
-    suspend fun getActiveCourses(cookies: String): List<Course>?
+    suspend fun getActiveCoursesWithAssignments(cookies: String): List<CourseWithAssignments>?
 }
 
 class RemoteCoolDataProviderImpl(
@@ -43,7 +44,7 @@ class RemoteCoolDataProviderImpl(
         )
     }
 
-    override suspend fun getActiveCourses(cookies: String): List<Course>? {
+    override suspend fun getActiveCoursesWithAssignments(cookies: String): List<CourseWithAssignments>? {
         val response = coolApiService.getActiveCourses(cookies)
         if (!response.isSuccessful) {
             // The request failed
@@ -66,13 +67,16 @@ class RemoteCoolDataProviderImpl(
                     return@async if (assignments == null) {
                         null
                     } else {
-                        Course(
-                            id = it.id,
-                            name = it.name,
-                            isPublic = it.isPublic,
-                            courseCode = it.courseCode,
+                        CourseWithAssignments(
+                            course = Course(
+                                id = it.id,
+                                name = it.name,
+                                isPublic = it.isPublic,
+                                courseCode = it.courseCode
+                            ),
                             assignments = assignments
                         )
+
                     }
                 }
             }.awaitAll()

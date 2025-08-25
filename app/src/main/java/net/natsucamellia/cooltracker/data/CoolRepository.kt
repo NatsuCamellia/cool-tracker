@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import net.natsucamellia.cooltracker.auth.AuthManager
 import net.natsucamellia.cooltracker.auth.LoginState
 import net.natsucamellia.cooltracker.data.local.LocalCoolDataProvider
-import net.natsucamellia.cooltracker.model.Course
+import net.natsucamellia.cooltracker.model.CourseWithAssignments
 import net.natsucamellia.cooltracker.model.Profile
 
 interface CoolRepository {
@@ -24,7 +24,7 @@ interface CoolRepository {
      * Get the current user's active courses.
      * @return list of active courses, null if failed.
      */
-    fun getActiveCourses(): Flow<List<Course>?>
+    fun getActiveCoursesWithAssignments(): Flow<List<CourseWithAssignments>?>
 }
 
 class NetworkCoolRepository(
@@ -66,12 +66,12 @@ class NetworkCoolRepository(
      * @return list of active courses flow, null flow if failed.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
-    override fun getActiveCourses(): Flow<List<Course>?> =
+    override fun getActiveCoursesWithAssignments(): Flow<List<CourseWithAssignments>?> =
         authManager.loginState.flatMapLatest { state ->
             when (state) {
                 is LoginState.LoggedIn -> {
                     val cookies = state.cookies
-                    val courses = remoteCoolDataProvider.getActiveCourses(cookies)
+                    val courses = remoteCoolDataProvider.getActiveCoursesWithAssignments(cookies)
                     flowOf(courses)
                 }
 

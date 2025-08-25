@@ -36,7 +36,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import net.natsucamellia.cooltracker.R
-import net.natsucamellia.cooltracker.model.Course
+import net.natsucamellia.cooltracker.model.Assignment
+import net.natsucamellia.cooltracker.model.CourseWithAssignments
 import net.natsucamellia.cooltracker.model.chineseName
 import net.natsucamellia.cooltracker.model.englishName
 import net.natsucamellia.cooltracker.ui.widgets.AssignmentListItem
@@ -48,21 +49,21 @@ import kotlin.time.ExperimentalTime
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun HomeScreen(
-    uiState: CoolViewModel.CoolUiState.Success,
+    coursesWithAssignments: List<CourseWithAssignments>,
+    isRefreshing: Boolean,
     modifier: Modifier = Modifier,
     onRefresh: () -> Unit = {},
 ) {
     val refreshState = rememberPullToRefreshState()
-    val courses = uiState.courses
 
     PullToRefreshBox(
-        isRefreshing = uiState.isRefreshing,
+        isRefreshing = isRefreshing,
         onRefresh = onRefresh,
         state = refreshState,
         indicator = {
             LoadingIndicator(
                 state = refreshState,
-                isRefreshing = uiState.isRefreshing,
+                isRefreshing = isRefreshing,
                 modifier = Modifier.align(Alignment.TopCenter)
             )
         },
@@ -77,7 +78,7 @@ fun HomeScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     AssignmentDashboard(
-                        uiState = uiState,
+                        assignments = coursesWithAssignments.flatMap { it.assignments },
                         modifier = Modifier
                             .padding(vertical = 16.dp)
                     )
@@ -100,9 +101,9 @@ fun HomeScreen(
                     )
                 }
             }
-            items(courses) {
+            items(coursesWithAssignments) {
                 CourseCard(
-                    course = it,
+                    courseWithAssignments = it,
                     onGoing = true,
                     modifier = Modifier.padding(vertical = 16.dp)
                 )
@@ -125,9 +126,9 @@ fun HomeScreen(
                     )
                 }
             }
-            items(courses) {
+            items(coursesWithAssignments) {
                 CourseCard(
-                    course = it,
+                    courseWithAssignments = it,
                     onGoing = false,
                     modifier = Modifier.padding(vertical = 16.dp)
                 )
@@ -139,11 +140,10 @@ fun HomeScreen(
 @OptIn(ExperimentalTime::class)
 @Composable
 fun AssignmentDashboard(
-    uiState: CoolViewModel.CoolUiState.Success,
+    assignments: List<Assignment>,
     modifier: Modifier = Modifier
 ) {
     val now = Clock.System.now()
-    val assignments = uiState.courses.flatMap { it.assignments }
     val onGoingAssignments = assignments.filter { it.dueTime > now }
     val pending = onGoingAssignments.count { !it.submitted }
     val onGoing = onGoingAssignments.size
@@ -212,12 +212,13 @@ fun DashboardItem(
 @OptIn(ExperimentalTime::class)
 @Composable
 private fun CourseCard(
-    course: Course,
+    courseWithAssignments: CourseWithAssignments,
     modifier: Modifier = Modifier,
     onGoing: Boolean? = null
 ) {
+    val course = courseWithAssignments.course
     // Filter assignment based on onGoing
-    val assignments = course.assignments.filter {
+    val assignments = courseWithAssignments.assignments.filter {
         when (onGoing) {
             true -> it.dueTime > Clock.System.now()
             false -> it.dueTime <= Clock.System.now()

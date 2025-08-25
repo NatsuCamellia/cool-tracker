@@ -159,17 +159,19 @@ private fun CoolNavHost(
             )
         }
     ) {
+        val coursesWithAssignments = uiState.coursesWithAssignments
+        val profile = uiState.profile
+        val isRefreshing = uiState.isRefreshing
         composable<Route.Courses> { backStackEntry ->
             val destination: Route.Courses = backStackEntry.toRoute()
             val courseId = destination.courseId
-            val courses = uiState.courses
             val onCourseClick: (Course) -> Unit = { course ->
                 navController.navigate(Route.Courses(courseId = course.id))
             }
 
             if (twoPane) {
                 TwoPaneCourseView(
-                    uiState = uiState,
+                    coursesWithAssignments = coursesWithAssignments,
                     courseId = courseId,
                     onCourseClick = onCourseClick,
                     modifier = Modifier.padding(end = 16.dp)
@@ -178,17 +180,18 @@ private fun CoolNavHost(
                 if (courseId == null) {
                     // Only course list
                     CourseListScreen(
-                        uiState = uiState,
+                        coursesWithAssignments = coursesWithAssignments,
                         onCourseClick = onCourseClick,
                         modifier = Modifier.padding(horizontal = 16.dp)
                     )
                 } else {
                     // Only course detail
-                    val course = courses.find { course -> course.id == courseId }
+                    val courseWithAssignments =
+                        coursesWithAssignments.find { cwa -> cwa.course.id == courseId }
                     // Ideally this should never be null
-                    if (course != null) {
+                    if (courseWithAssignments != null) {
                         CourseDetailScreen(
-                            course = course,
+                            courseWithAssignments = courseWithAssignments,
                             navigateUp = { navController.navigateUp() },
                             modifier = Modifier.padding(horizontal = 16.dp)
                         )
@@ -198,12 +201,15 @@ private fun CoolNavHost(
         }
         composable<Route.Assignments> {
             HomeScreen(
-                uiState = uiState, onRefresh = refresh
+                coursesWithAssignments = coursesWithAssignments,
+                isRefreshing = isRefreshing,
+                onRefresh = refresh
             )
         }
         composable<Route.Account> {
             AccountScreen(
-                uiState = uiState, logout = logout
+                profile = profile,
+                logout = logout
             )
         }
     }
