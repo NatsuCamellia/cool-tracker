@@ -15,20 +15,20 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import net.natsucamellia.cooltracker.CoolApplication
+import net.natsucamellia.cooltracker.auth.AuthManager
+import net.natsucamellia.cooltracker.auth.LoginState
 import net.natsucamellia.cooltracker.data.CoolRepository
 import net.natsucamellia.cooltracker.model.Course
 import net.natsucamellia.cooltracker.model.Profile
 
 class CoolViewModel(
     private val coolRepository: CoolRepository,
+    private val authManager: AuthManager
 ) : ViewModel() {
-    // There is not specific reason to choose Compose state or StateFlow, the following states
-    // are chosen at random. They can be changed if needed.
     var coolLoginState: CoolLoginState by mutableStateOf(CoolLoginState.Init)
-        private set
     private val courses = MutableStateFlow<List<Course>?>(null)
     private val profile = MutableStateFlow<Profile?>(null)
-    private val isLoading = MutableStateFlow<Boolean>(false)
+    private val isLoading = MutableStateFlow(false)
     val coolUiState = combine(courses, profile, isLoading) { courses, profile, isLoading ->
         if (isLoading && (courses == null || profile == null)) {
             // Only show loading when loading data for the first time
@@ -46,16 +46,22 @@ class CoolViewModel(
     )
 
     init {
-        // Try to restore session
         viewModelScope.launch {
-            coolLoginState = if (coolRepository.loadStoredUserSessionCookies()) {
-                CoolLoginState.LoggedIn
-            } else {
-                CoolLoginState.LoggedOut
-            }
+            authManager.loginState.collect {
+                when (it) {
+                    is LoginState.LoggedIn -> {
+                        coolLoginState = CoolLoginState.LoggedIn
+                        postLogin()
+                    }
 
-            if (coolLoginState == CoolLoginState.LoggedIn) {
-                postLogin()
+                    is LoginState.LoggedOut -> {
+                        coolLoginState = CoolLoginState.LoggedOut
+                    }
+
+                    else -> {
+                        coolLoginState = CoolLoginState.Init
+                    }
+                }
             }
         }
     }
@@ -77,20 +83,10 @@ class CoolViewModel(
     }
 
     /**
-     * Handle the login button click.
-     */
-    fun onLoginClicked() {
-        coolLoginState = CoolLoginState.LoggingIn
-    }
-
-    /**
      * Login to NTU COOL with the given [cookies].
      */
     fun login(cookies: String) {
-        // TODO: Check if the cookies are valid
-        coolRepository.saveUserSessionCookies(cookies)
-        coolLoginState = CoolLoginState.LoggedIn
-        postLogin()
+        authManager.login(cookies)
     }
 
     /**
@@ -104,11 +100,7 @@ class CoolViewModel(
      * Logout from NTU COOL.
      */
     fun logout() {
-        // Clear the cookies from repository, since it's expected not to automatically login when
-        // the app is started again. Also the user's intention is to clear the session, which is
-        // the reason the user try to logout.
-        coolRepository.clearUserSessionCookies()
-        coolLoginState = CoolLoginState.LoggedOut
+        authManager.logout()
     }
 
     companion object {
@@ -118,7 +110,10 @@ class CoolViewModel(
                 // and it's context to the viewmodel. This won't cause any memory leaks because the
                 // viewmodel will be destroyed when the activity is destroyed.
                 val application = (this[APPLICATION_KEY] as CoolApplication)
-                CoolViewModel(application.container.coolRepository)
+                CoolViewModel(
+                    coolRepository = application.container.coolRepository,
+                    authManager = application.container.authManager
+                )
             }
         }
     }
@@ -128,9 +123,6 @@ class CoolViewModel(
         data object Init : CoolLoginState
         data object LoggedIn : CoolLoginState
         data object LoggedOut : CoolLoginState
-
-        /** Waiting the user to login into NTU COOL in the WebView */
-        data object LoggingIn : CoolLoginState
     }
 
     sealed interface CoolUiState {

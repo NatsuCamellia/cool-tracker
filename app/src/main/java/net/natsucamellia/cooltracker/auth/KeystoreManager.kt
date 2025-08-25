@@ -1,4 +1,4 @@
-package net.natsucamellia.cooltracker.crypto
+package net.natsucamellia.cooltracker.auth
 
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties

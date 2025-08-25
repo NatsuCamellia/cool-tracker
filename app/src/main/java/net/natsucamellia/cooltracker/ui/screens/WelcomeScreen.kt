@@ -36,66 +36,97 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import net.natsucamellia.cooltracker.R
 
 @Composable
 fun WelcomeScreen(
     modifier: Modifier = Modifier,
-    onLogin: () -> Unit = {}
+    onLoginSuccess: (String) -> Unit = {}
 ) {
+    val navController = rememberNavController()
+
     Scaffold(
         modifier = modifier,
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
         contentColor = contentColorFor(MaterialTheme.colorScheme.surfaceContainer)
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceAround
+        NavHost(
+            navController = navController,
+            startDestination = "welcome"
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = stringResource(R.string.welcome),
-                    style = MaterialTheme.typography.displayLarge,
-                    fontFamily = FontFamily.Serif
-                )
-                Spacer(Modifier.height(16.dp))
-                Text(
-                    text = stringResource(R.string.slogan),
-                    style = MaterialTheme.typography.bodyMedium
+            composable("welcome") {
+                WelcomePane(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding),
+                    onLoginClick = { navController.navigate("login") }
                 )
             }
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Button(
-                    onClick = onLogin
-                ) {
-                    Icon(Icons.AutoMirrored.Filled.Login, "Login")
-                    Spacer(modifier = Modifier.width(ButtonDefaults.IconSpacing))
-                    Text(stringResource(R.string.log_in_to_ntu_cool))
-                }
-                Spacer(Modifier.height(16.dp))
-                Text(
-                    text = buildAnnotatedString {
-                        append(stringResource(R.string.agreement1))
-                        withLink(
-                            LinkAnnotation.Url(
-                                "https://github.com/NatsuCamellia/cool-tracker?tab=readme-ov-file#隱私權與免責聲明"
-                            )
-                        ) {
-                            append(stringResource(R.string.privacy_policy_disclaimer))
-                        }
-                        append(stringResource(R.string.period))
-                    },
-                    style = MaterialTheme.typography.bodySmall,
-                    textAlign = TextAlign.Center
+            composable("login") {
+                LoginWebViewScreen(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding),
+                    onLoginSuccess = onLoginSuccess
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun WelcomePane(
+    modifier: Modifier = Modifier,
+    onLoginClick: () -> Unit
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceAround
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = stringResource(R.string.welcome),
+                style = MaterialTheme.typography.displayLarge,
+                fontFamily = FontFamily.Serif
+            )
+            Spacer(Modifier.height(16.dp))
+            Text(
+                text = stringResource(R.string.slogan),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Button(
+                onClick = onLoginClick
+            ) {
+                Icon(Icons.AutoMirrored.Filled.Login, "Login")
+                Spacer(modifier = Modifier.width(ButtonDefaults.IconSpacing))
+                Text(stringResource(R.string.log_in_to_ntu_cool))
+            }
+            Spacer(Modifier.height(16.dp))
+            Text(
+                text = buildAnnotatedString {
+                    append(stringResource(R.string.agreement1))
+                    withLink(
+                        LinkAnnotation.Url(
+                            "https://github.com/NatsuCamellia/cool-tracker?tab=readme-ov-file#隱私權與免責聲明"
+                        )
+                    ) {
+                        append(stringResource(R.string.privacy_policy_disclaimer))
+                    }
+                    append(stringResource(R.string.period))
+                },
+                style = MaterialTheme.typography.bodySmall,
+                textAlign = TextAlign.Center
+            )
         }
     }
 }
@@ -119,52 +150,48 @@ fun LoginWebViewScreen(
     // I'm not sure if we can obtain session cookies from external browsers, which is preferred,
     // but we use embedded WebView for now. If you know how to do it, please try.
     val context = LocalContext.current
+    val cookieManager = CookieManager.getInstance()
+    // Force logout. Otherwise the user may be stocked in the browser.
+    // TODO: Try to use CookieManager across the app
+    cookieManager.removeAllCookies(null)
 
-    Scaffold(
+    AndroidView(
         modifier = modifier,
-        containerColor = MaterialTheme.colorScheme.surfaceContainer,
-        contentColor = contentColorFor(MaterialTheme.colorScheme.surfaceContainer)
-    ) { innerPadding ->
-        AndroidView(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            factory = {
-                // Create a WebView for the login page
-                WebView(context).apply {
-                    layoutParams = ViewGroup.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT
-                    )
-                    webViewClient = object : WebViewClient() {
-                        // This function is called when a page start loading. We choose this instead
-                        // of the others because we want to return to the app as soon as the user
-                        // has logged in and been redirected to the homepage, whose url starts with
-                        // SUCCESS_URL_PREFIX.
-                        override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                            super.onPageStarted(view, url, favicon)
-                            Log.d("WebViewCookies", "onPageStarted for $url")
-                            if (url != null && url.startsWith(SUCCESS_URL_PREFIX)) {
-                                // The user has logged and been redirected to the homepage.
-                                // Now we can obtain and pass the cookies to the callback and return
-                                // to the app.
-                                val cookieManager = CookieManager.getInstance()
-                                val cookies: String = cookieManager.getCookie(url)
-                                onLoginSuccess(cookies)
-                                // Clear the cookies for privacy and security.
-                                cookieManager.removeAllCookies(null)
-                            }
+        factory = {
+            // Create a WebView for the login page
+            WebView(context).apply {
+                layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
+                webViewClient = object : WebViewClient() {
+                    // This function is called when a page start loading. We choose this instead
+                    // of the others because we want to return to the app as soon as the user
+                    // has logged in and been redirected to the homepage, whose url starts with
+                    // SUCCESS_URL_PREFIX.
+                    override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                        Log.d("WebViewCookies", "onPageStarted for $url")
+                        if (url != null && url.startsWith(SUCCESS_URL_PREFIX)) {
+                            // The user has logged and been redirected to the homepage.
+                            // Now we can obtain and pass the cookies to the callback and return
+                            // to the app.
+                            val cookies: String = cookieManager.getCookie(url)
+                            onLoginSuccess(cookies)
+                            // Clear the cookies for privacy and security.
+                            cookieManager.removeAllCookies(null)
                         }
+                        super.onPageStarted(view, url, favicon)
                     }
-                    // Javascript is needed to login, and it seems to be dangerous because the
-                    // linter complains about it. We add a annotation at the top of this composable
-                    // for now, but we should avoid it in the future.
-                    settings.javaScriptEnabled = true
-                    loadUrl(LOGIN_URL)
                 }
+                // Javascript is needed to login, and it seems to be dangerous because the
+                // linter complains about it. We add a annotation at the top of this composable
+                // for now, but we should avoid it in the future.
+                settings.javaScriptEnabled = true
+                loadUrl(LOGIN_URL)
             }
-        )
-    }
+        }
+    )
+
 }
 
 @Preview

@@ -1,12 +1,14 @@
 package net.natsucamellia.cooltracker.data
 
 import android.app.Application
+import net.natsucamellia.cooltracker.auth.AuthManager
 import net.natsucamellia.cooltracker.network.CoolApiService
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 interface AppContainer {
     val coolRepository: CoolRepository
+    val authManager: AuthManager
 }
 
 class DefaultAppContainer(
@@ -22,10 +24,16 @@ class DefaultAppContainer(
         retrofit.create(CoolApiService::class.java)
     }
 
+    override val authManager by lazy {
+        AuthManager(
+            sharedPref = application.getSharedPreferences(PREF_NAME, Application.MODE_PRIVATE)
+        )
+    }
+
     override val coolRepository: CoolRepository by lazy {
         NetworkCoolRepository(
             coolApiService =  retrofitService,
-            sharedPref = application.getSharedPreferences(PREF_NAME, Application.MODE_PRIVATE)
+            authManager = authManager
         )
     }
 }

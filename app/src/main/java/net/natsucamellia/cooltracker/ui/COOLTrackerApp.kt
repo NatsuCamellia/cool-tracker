@@ -42,7 +42,6 @@ import net.natsucamellia.cooltracker.ui.screens.CourseListScreen
 import net.natsucamellia.cooltracker.ui.screens.ErrorScreen
 import net.natsucamellia.cooltracker.ui.screens.HomeScreen
 import net.natsucamellia.cooltracker.ui.screens.LoadingScreen
-import net.natsucamellia.cooltracker.ui.screens.LoginWebViewScreen
 import net.natsucamellia.cooltracker.ui.screens.TwoPaneCourseView
 import net.natsucamellia.cooltracker.ui.screens.WelcomeScreen
 
@@ -57,12 +56,6 @@ fun COOLTrackerApp(
 
         CoolViewModel.CoolLoginState.LoggedOut -> {
             WelcomeScreen(
-                onLogin = coolViewModel::onLoginClicked
-            )
-        }
-
-        CoolViewModel.CoolLoginState.LoggingIn -> {
-            LoginWebViewScreen(
                 onLoginSuccess = coolViewModel::login
             )
         }

@@ -1,12 +1,14 @@
 package net.natsucamellia.cooltracker.data
 
-import android.content.SharedPreferences
 import android.util.Log
-import androidx.core.content.edit
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import net.natsucamellia.cooltracker.crypto.KeystoreManager
+import kotlinx.coroutines.launch
+import net.natsucamellia.cooltracker.auth.AuthManager
+import net.natsucamellia.cooltracker.auth.LoginState
 import net.natsucamellia.cooltracker.model.Assignment
 import net.natsucamellia.cooltracker.model.Course
 import net.natsucamellia.cooltracker.model.Profile
@@ -15,19 +17,6 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 interface CoolRepository {
-    /** Save user's session cookies to local storage */
-    fun saveUserSessionCookies(cookies: String)
-
-    /** Clear user's session cookies from local storage */
-    fun clearUserSessionCookies()
-
-    /**
-     * Load user's session cookies to local storage.
-     *
-     * @return true if cookies are loaded successfully, false otherwise.
-     */
-    suspend fun loadStoredUserSessionCookies(): Boolean
-
     /**
      * Get the current user's profile information.
      * @return user's profile information, null if failed.
@@ -43,62 +32,19 @@ interface CoolRepository {
 
 class NetworkCoolRepository(
     private val coolApiService: CoolApiService,
-    private val sharedPref: SharedPreferences,
-    private val keystoreManager: KeystoreManager = KeystoreManager()
+    private val authManager: AuthManager
 ) : CoolRepository {
-    // TODO: Maybe use a CookieManager to store cookies?
-    //  Since CoolRepository interface should not contain any implementation details,
-    /** User's session cookies, write-only from outside with [saveUserSessionCookies] and [clearUserSessionCookies] */
     private var userSessionCookies: String? = null
 
-    /**
-     * Encrypt with Android Keystore and save user's session cookies to [SharedPreferences].
-     */
-    override fun saveUserSessionCookies(cookies: String) {
-        userSessionCookies = cookies
-        val encryptedPair = keystoreManager.encrypt(cookies)
-        encryptedPair?.let { (encryptedCookies, iv) ->
-            sharedPref.edit {
-                putString(KEY_ENCRYPTED_COOKIES, encryptedCookies)
-                // Also store the initialization vector (IV) for decryption
-                putString(KEY_IV, iv)
-                apply()
+    init {
+        CoroutineScope(Dispatchers.IO).launch {
+            authManager.loginState.collect {
+                userSessionCookies = if (it is LoginState.LoggedIn) {
+                    it.cookies
+                } else {
+                    null
+                }
             }
-            Log.d(TAG, "User session cookies saved successfully.")
-        } ?: run {
-            Log.e(TAG, "Failed to encrypt cookies.")
-        }
-    }
-
-    /**
-     * Clear user's session cookies from [SharedPreferences].
-     */
-    override fun clearUserSessionCookies() {
-        userSessionCookies = null
-        sharedPref.edit {
-            remove(KEY_ENCRYPTED_COOKIES)
-            remove(KEY_IV)
-            apply()
-        }
-        Log.d(TAG, "User session cookies cleared successfully.")
-    }
-
-    /**
-     * Load user's session cookies from [SharedPreferences].
-     */
-    override suspend fun loadStoredUserSessionCookies(): Boolean {
-        val encryptedData = sharedPref.getString(KEY_ENCRYPTED_COOKIES, null)
-        val iv = sharedPref.getString(KEY_IV, null)
-
-        return if (encryptedData != null && iv != null) {
-            keystoreManager.decrypt(encryptedData, iv)?.let { cookies ->
-                val response = coolApiService.getActiveCourses(cookies)
-                userSessionCookies = cookies
-                response.isSuccessful
-            } ?: false
-        } else {
-            Log.d(TAG, "No stored user session cookies found.")
-            false
         }
     }
 
