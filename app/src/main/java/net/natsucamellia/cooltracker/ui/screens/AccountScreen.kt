@@ -15,11 +15,21 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.automirrored.rounded.Logout
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
@@ -30,6 +40,7 @@ import coil3.compose.AsyncImage
 import net.natsucamellia.cooltracker.R
 import net.natsucamellia.cooltracker.ui.widgets.SectionLabel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountScreen(
     uiState: CoolViewModel.CoolUiState.Success,
@@ -37,6 +48,7 @@ fun AccountScreen(
     modifier: Modifier = Modifier
 ) {
     val defaultAvatarUrl = "https://cool.ntu.edu.tw/images/messages/avatar-50.png"
+    var showLogoutDialog by remember { mutableStateOf(false) }
     val profile = uiState.profile
     Column(
         modifier = modifier
@@ -89,7 +101,7 @@ fun AccountScreen(
             // Logout
             SettingListItem(
                 title = stringResource(R.string.logout),
-                onClick = logout
+                onClick = { showLogoutDialog = true }
             )
         }
 
@@ -124,6 +136,42 @@ fun AccountScreen(
                 description = getAppVersion(context)
             )
         }
+    }
+
+    if (showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = { showLogoutDialog = false },
+            confirmButton = {
+                Button(
+                    onClick = logout,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                    )
+                ) {
+                    Text(stringResource(R.string.logout))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showLogoutDialog = false }
+                ) {
+                    Text(stringResource(R.string.cancel))
+                }
+            },
+            icon = {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Rounded.Logout,
+                    contentDescription = stringResource(R.string.source_code_desc)
+                )
+            },
+            title = {
+                Text(stringResource(R.string.logout))
+            },
+            text = {
+                Text(stringResource(R.string.logout_text))
+            }
+        )
     }
 }
 

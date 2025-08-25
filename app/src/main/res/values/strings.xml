@@ -24,4 +24,6 @@
     <string name="courses">Courses</string>
     <string name="home">Home</string>
     <string name="source_code_desc">Check the source code on GitHub</string>
+    <string name="logout_text">Your account information will be removed from this device after you log out.</string>
+    <string name="cancel">Cancel</string>
 </resources>
