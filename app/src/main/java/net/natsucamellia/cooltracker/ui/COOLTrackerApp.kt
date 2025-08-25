@@ -31,6 +31,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import androidx.window.core.layout.WindowSizeClass
+import net.natsucamellia.cooltracker.auth.LoginState
 import net.natsucamellia.cooltracker.model.Course
 import net.natsucamellia.cooltracker.nav.CoolNavigationDestination
 import net.natsucamellia.cooltracker.nav.CoolNavigationWrapper
@@ -49,18 +50,18 @@ import net.natsucamellia.cooltracker.ui.screens.WelcomeScreen
 fun COOLTrackerApp(
     coolViewModel: CoolViewModel
 ) {
-    when (coolViewModel.coolLoginState) {
-        CoolViewModel.CoolLoginState.Init -> {
+    when (coolViewModel.loginState.collectAsState().value) {
+        LoginState.Loading -> {
             InitScreen()
         }
 
-        CoolViewModel.CoolLoginState.LoggedOut -> {
+        LoginState.LoggedOut -> {
             WelcomeScreen(
                 onLoginSuccess = coolViewModel::login
             )
         }
 
-        CoolViewModel.CoolLoginState.LoggedIn -> {
+        is LoginState.LoggedIn, LoginState.Disconnected -> {
             LoggedInScreen(
                 coolViewModel = coolViewModel
             )

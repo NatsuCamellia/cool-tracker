@@ -69,7 +69,12 @@ class NetworkCoolRepository(
 
     override fun refresh(onDone: () -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
-            val state = authManager.loginState.value
+            var state = authManager.loginState.value
+            if (state is LoginState.Disconnected) {
+                // Try to recover from offline
+                authManager.checkInitialStatus()
+                state = authManager.loginState.value
+            }
             if (state is LoginState.LoggedIn) {
                 refresh(state.cookies)
             }

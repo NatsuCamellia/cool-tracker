@@ -1,8 +1,5 @@
 package net.natsucamellia.cooltracker.ui.screens
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
@@ -13,10 +10,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import net.natsucamellia.cooltracker.CoolApplication
 import net.natsucamellia.cooltracker.auth.AuthManager
-import net.natsucamellia.cooltracker.auth.LoginState
 import net.natsucamellia.cooltracker.data.CoolRepository
 import net.natsucamellia.cooltracker.model.CourseWithAssignments
 import net.natsucamellia.cooltracker.model.Profile
@@ -25,7 +20,11 @@ class CoolViewModel(
     private val coolRepository: CoolRepository,
     private val authManager: AuthManager
 ) : ViewModel() {
-    var coolLoginState: CoolLoginState by mutableStateOf(CoolLoginState.Init)
+    val loginState = authManager.loginState.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        authManager.loginState.value
+    )
     private val isLoading = MutableStateFlow(false)
     val coolUiState = combine(
         coolRepository.getActiveCoursesWithAssignments(),
@@ -46,27 +45,6 @@ class CoolViewModel(
         SharingStarted.WhileSubscribed(5000),
         CoolUiState.Loading
     )
-
-    init {
-        viewModelScope.launch {
-            authManager.loginState.collect {
-                when (it) {
-                    is LoginState.LoggedIn -> {
-                        coolLoginState = CoolLoginState.LoggedIn
-                        postLogin()
-                    }
-
-                    is LoginState.LoggedOut -> {
-                        coolLoginState = CoolLoginState.LoggedOut
-                    }
-
-                    else -> {
-                        coolLoginState = CoolLoginState.Init
-                    }
-                }
-            }
-        }
-    }
 
     /**
      * Update the data from the repository.
@@ -92,13 +70,6 @@ class CoolViewModel(
     }
 
     /**
-     * Do necessary works after login.
-     */
-    private fun postLogin() {
-        updateData()
-    }
-
-    /**
      * Logout from NTU COOL.
      */
     fun logout() {
@@ -118,13 +89,6 @@ class CoolViewModel(
                 )
             }
         }
-    }
-
-    sealed interface CoolLoginState {
-        /** Waiting the viewmodel to initialize */
-        data object Init : CoolLoginState
-        data object LoggedIn : CoolLoginState
-        data object LoggedOut : CoolLoginState
     }
 
     sealed interface CoolUiState {

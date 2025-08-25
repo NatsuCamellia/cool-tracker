@@ -12,11 +12,17 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okio.IOException
 
 sealed interface LoginState {
     data class LoggedIn(val cookies: String) : LoginState
 
     object LoggedOut : LoginState
+
+    /** The session cookie exists, but can't be validated */
+    object Disconnected : LoginState
+
+    /** The auth manager is trying to recover session */
     object Loading : LoginState
 }
 
@@ -35,11 +41,19 @@ class AuthManager(
 
     fun login(cookie: String) {
         CoroutineScope(Dispatchers.IO).launch {
-            if (validateCookie(cookie)) {
-                _loginState.update { LoginState.LoggedIn(cookie) }
-                saveUserSessionCookies(cookie)
-            } else {
-                _loginState.update { LoginState.LoggedOut }
+            when (validateCookie(cookie)) {
+                ValidateResult.Valid -> {
+                    _loginState.update { LoginState.LoggedIn(cookie) }
+                    saveUserSessionCookies(cookie)
+                }
+
+                ValidateResult.Invalid -> {
+                    _loginState.update { LoginState.LoggedOut }
+                }
+
+                ValidateResult.Disconnected -> {
+                    _loginState.update { LoginState.Disconnected }
+                }
             }
         }
     }
@@ -98,16 +112,25 @@ class AuthManager(
             return
         }
 
-        if (!validateCookie(cookie)) {
-            _loginState.update { LoginState.LoggedOut }
-            Log.d(TAG, "Invalid cookie")
-        }
+        when (validateCookie(cookie)) {
+            ValidateResult.Valid -> {
+                _loginState.update { LoginState.LoggedIn(cookie) }
+                Log.d(TAG, "User session cookies loaded successfully.")
+            }
 
-        _loginState.update { LoginState.LoggedIn(cookie) }
-        Log.d(TAG, "User session cookies loaded successfully.")
+            ValidateResult.Invalid -> {
+                _loginState.update { LoginState.LoggedOut }
+                Log.d(TAG, "Invalid cookie")
+            }
+
+            ValidateResult.Disconnected -> {
+                _loginState.update { LoginState.Disconnected }
+                Log.d(TAG, "User is disconnected")
+            }
+        }
     }
 
-    private suspend fun validateCookie(cookie: String): Boolean {
+    private suspend fun validateCookie(cookie: String): ValidateResult {
         // Try to load the profile page.
         // If the cookie is valid, the response will be successful.
         // Otherwise, the response will be a redirect.
@@ -119,16 +142,21 @@ class AuthManager(
 
         // Make sure the network connection runs on IO thread
         return withContext(Dispatchers.IO) {
-            client.newCall(request).execute().use { response ->
-                if (response.isSuccessful) {
-                    return@withContext true
-                } else if (response.isRedirect) {
-                    Log.d(TAG, "Invalid cookie")
-                    return@withContext false
-                } else {
-                    Log.d(TAG, "Request failed: ${response.code}")
-                    return@withContext false
+            try {
+                client.newCall(request).execute().use { response ->
+                    if (response.isSuccessful) {
+                        return@withContext ValidateResult.Valid
+                    } else if (response.isRedirect) {
+                        Log.d(TAG, "Invalid cookie")
+                        return@withContext ValidateResult.Invalid
+                    } else {
+                        Log.d(TAG, "Request failed: ${response.code}")
+                        return@withContext ValidateResult.Disconnected
+                    }
                 }
+            } catch (e: IOException) {
+                Log.e(TAG, "Network error", e)
+                return@withContext ValidateResult.Disconnected
             }
         }
     }
@@ -137,5 +165,11 @@ class AuthManager(
         private const val TAG = "AuthManager"
         private const val KEY_ENCRYPTED_COOKIES = "encrypted_cool_cookies"
         private const val KEY_IV = "cool_cookies_iv"
+    }
+
+    sealed interface ValidateResult {
+        object Valid : ValidateResult
+        object Invalid : ValidateResult
+        object Disconnected : ValidateResult
     }
 }
