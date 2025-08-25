@@ -47,7 +47,6 @@ fun AccountScreen(
     logout: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val defaultAvatarUrl = "https://cool.ntu.edu.tw/images/messages/avatar-50.png"
     var showLogoutDialog by remember { mutableStateOf(false) }
     val profile = uiState.profile
     Column(
@@ -71,7 +70,7 @@ fun AccountScreen(
                 description = profile.name,
                 trailingContent = {
                     AsyncImage(
-                        model = profile.avatarUrl ?: defaultAvatarUrl,
+                        model = profile.avatarUrl,
                         contentDescription = "Avatar",
                         modifier = Modifier
                             .clip(CircleShape)

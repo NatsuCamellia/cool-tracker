@@ -8,7 +8,7 @@ data class Profile(
     val name: String,
     val bio: String?,
     val primaryEmail: String,
-    val avatarUrl: String?
+    val avatarUrl: String
 )
 
 val sampleProfile: Profile = Profile(
@@ -16,5 +16,5 @@ val sampleProfile: Profile = Profile(
     name = "Sample User",
     bio = "Hello!",
     primaryEmail = "sample_user@example.com",
-    avatarUrl = null
+    avatarUrl = "https://cool.ntu.edu.tw/images/messages/avatar-50.png"
 )

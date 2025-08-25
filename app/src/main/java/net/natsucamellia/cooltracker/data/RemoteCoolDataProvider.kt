@@ -39,6 +39,7 @@ class RemoteCoolDataProviderImpl(
             bio = profileDTO.bio,
             primaryEmail = profileDTO.primaryEmail,
             avatarUrl = profileDTO.avatarUrl
+                ?: "https://cool.ntu.edu.tw/images/messages/avatar-50.png"
         )
     }
 
