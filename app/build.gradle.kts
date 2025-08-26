@@ -46,6 +46,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.work.runtime.ktx)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -68,6 +69,8 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.adaptive.android)
     implementation(libs.androidx.core.splashscreen)
+    implementation(libs.androidx.glance.appwidget)
+    implementation(libs.androidx.glance.material3)
     implementation(libs.androidx.material3.adaptive.navigation.suite.android)
     implementation(libs.androidx.room.ktx)
     testImplementation(libs.junit)

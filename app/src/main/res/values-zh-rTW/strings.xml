@@ -26,4 +26,8 @@
     <string name="source_code_desc">在 GitHub 上檢視開放原始碼</string>
     <string name="logout_text">登出後，您的帳戶資訊將會從此裝置移除。</string>
     <string name="cancel">取消</string>
+    <string name="dashboard_widget_description">概覽</string>
+    <string name="submitted">已繳交</string>
+    <string name="pending">待繳交</string>
+    <string name="dashboard">概覽</string>
 </resources>

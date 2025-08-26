@@ -14,13 +14,23 @@
         android:theme="@style/Theme.COOLTracker">
         <activity
             android:name=".MainActivity"
+            android:launchMode="singleTask"
             android:exported="true"
             android:theme="@style/Theme.COOLTracker.Starting">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <receiver
+            android:name=".glance.DashboardWidgetReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/dashboard_widget_provider_info" />
+        </receiver>
     </application>
 </manifest>

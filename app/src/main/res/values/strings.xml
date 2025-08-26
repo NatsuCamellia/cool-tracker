@@ -26,4 +26,8 @@
     <string name="source_code_desc">Check the source code on GitHub</string>
     <string name="logout_text">Your account information will be removed from this device after you log out.</string>
     <string name="cancel">Cancel</string>
+    <string name="dashboard_widget_description">Dashboard</string>
+    <string name="submitted">Submitted</string>
+    <string name="pending">Pending</string>
+    <string name="dashboard">Dashboard</string>
 </resources>
