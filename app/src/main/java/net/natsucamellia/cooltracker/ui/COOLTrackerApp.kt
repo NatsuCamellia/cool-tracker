@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.recalculateWindowInsets
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -34,7 +33,7 @@ import androidx.window.core.layout.WindowSizeClass
 import net.natsucamellia.cooltracker.auth.LoginState
 import net.natsucamellia.cooltracker.model.Course
 import net.natsucamellia.cooltracker.nav.CoolNavigationDestination
-import net.natsucamellia.cooltracker.nav.CoolNavigationWrapper
+import net.natsucamellia.cooltracker.nav.CoolNavigationSuiteScaffold
 import net.natsucamellia.cooltracker.nav.Route
 import net.natsucamellia.cooltracker.ui.screens.AccountScreen
 import net.natsucamellia.cooltracker.ui.screens.CoolViewModel
@@ -111,12 +110,11 @@ fun LoggedInScreen(
             }
 
             is CoolViewModel.CoolUiState.Success -> {
-                CoolNavigationWrapper(
+                CoolNavigationSuiteScaffold(
                     currentDestination = currentDestination,
                     navigateToTopLevelDestination = { coolDestination ->
                         navController.navigate(coolDestination.route)
                     },
-                    modifier = Modifier.recalculateWindowInsets()
                 ) {
                     CoolNavHost(
                         navController = navController,
