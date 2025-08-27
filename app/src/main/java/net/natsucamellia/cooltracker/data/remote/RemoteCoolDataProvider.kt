@@ -9,11 +9,19 @@ import net.natsucamellia.cooltracker.model.Assignment
 import net.natsucamellia.cooltracker.model.Course
 import net.natsucamellia.cooltracker.model.CourseWithAssignments
 import net.natsucamellia.cooltracker.model.Profile
-import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 interface RemoteCoolDataProvider {
+    /**
+     * Get the current user's profile information from NTU COOL API.
+     * @return user's profile information, null if failed.
+     */
     suspend fun getUserProfile(cookies: String): Profile?
+
+    /**
+     * Get the current user's active courses with assignments from NTU COOL API.
+     * @return list of active courses with assignments, null if failed.
+     */
     suspend fun getActiveCoursesWithAssignments(cookies: String): List<CourseWithAssignments>?
 }
 
@@ -22,10 +30,20 @@ class RemoteCoolDataProviderImpl(
 ) : RemoteCoolDataProvider {
 
     override suspend fun getUserProfile(cookies: String): Profile? {
-        val response = coolApiService.getCurrentUserProfile(cookies)
+        val response = try {
+            coolApiService.getCurrentUserProfile(cookies)
+        } catch (e: Exception) {
+            Log.e(TAG, "getUserProfile: $e")
+            null
+        }
+
+        if (response == null) {
+            return null
+        }
+
         if (!response.isSuccessful) {
-            Log.d("NetworkCoolRepository", "getRemoteProfile: $response")
-            Log.e("NetworkCoolRepository", "getRemoteProfile: ${response.errorBody()}")
+            Log.d(TAG, "getUserProfile: $response")
+            Log.e(TAG, "getUserProfile: ${response.errorBody()}")
             return null
         }
 
@@ -45,11 +63,21 @@ class RemoteCoolDataProviderImpl(
     }
 
     override suspend fun getActiveCoursesWithAssignments(cookies: String): List<CourseWithAssignments>? {
-        val response = coolApiService.getActiveCourses(cookies)
+        val response = try {
+            coolApiService.getActiveCourses(cookies)
+        } catch (e: Exception) {
+            Log.e(TAG, "getActiveCoursesWithAssignments: $e")
+            null
+        }
+
+        if (response == null) {
+            return null
+        }
+
         if (!response.isSuccessful) {
             // The request failed
-            Log.d("NetworkCoolRepository", "getRemoteProfile: $response")
-            Log.e("NetworkCoolRepository", "getRemoteProfile: ${response.errorBody()}")
+            Log.d(TAG, "getActiveCoursesWithAssignments: $response")
+            Log.e(TAG, "getActiveCoursesWithAssignments: ${response.errorBody()}")
             return null
         }
 
@@ -63,7 +91,7 @@ class RemoteCoolDataProviderImpl(
             // Map the courses to Jobs and wait all the results.
             courseDTOs.map {
                 async {
-                    val assignments = getRemoteCourseAssignments(it.id, cookies)
+                    val assignments = getCourseAssignments(it.id, cookies)
                     return@async if (assignments == null) {
                         null
                     } else {
@@ -89,12 +117,20 @@ class RemoteCoolDataProviderImpl(
      * Get the assignments for the course with [courseId] from NTU COOL API.
      * @return list of assignments, null if failed.
      */
-    @OptIn(ExperimentalTime::class)
-    private suspend fun getRemoteCourseAssignments(
+    private suspend fun getCourseAssignments(
         courseId: Int,
         cookies: String
     ): List<Assignment>? {
-        val response = coolApiService.getCourseAssignments(cookies, courseId)
+        val response = try {
+            coolApiService.getCourseAssignments(cookies, courseId)
+        } catch (e: Exception) {
+            Log.e(TAG, "getCourseAssignments: $e")
+            null
+        }
+
+        if (response == null) {
+            return null
+        }
 
         return if (response.isSuccessful) {
             val assignmentDTOs = response.body()
@@ -106,7 +142,7 @@ class RemoteCoolDataProviderImpl(
             assignmentDTOs.mapNotNull {
                 if (it.dueAt == null) {
                     // The due date is unspecified, skip this assignment
-                    // TODO(Maybe we need to show these assignments in the future.)
+                    // TODO: Maybe we need to show these assignments in the future.
                     null
                 } else {
                     Assignment(
@@ -123,8 +159,12 @@ class RemoteCoolDataProviderImpl(
             }
         } else {
             // The request failed
-            Log.e("NetworkCoolRepository", "getCourseAssignments: ${response.errorBody()}")
+            Log.e(TAG, "getCourseAssignments: ${response.errorBody()}")
             null
         }
+    }
+
+    companion object {
+        private const val TAG = "NetworkCoolRepository"
     }
 }
