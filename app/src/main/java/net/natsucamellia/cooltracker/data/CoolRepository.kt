@@ -58,11 +58,16 @@ class NetworkCoolRepository(
 
     override fun refresh(onDone: () -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
+            val state = authManager.loginState.value
             // Make sure the user is logged in before trying to refresh the data.
             authManager.refreshLoginState()
-            val state = authManager.loginState.value
-            if (state is LoginState.LoggedIn) {
-                val cookies = state.cookies
+            val newState = authManager.loginState.value
+
+            // We check both the old state and new state because if the user was not logged in
+            // originally, the local data would be updated twice when the user logs in. One by this
+            // method another by the init listener block.
+            if (state is LoginState.LoggedIn && newState is LoginState.LoggedIn) {
+                val cookies = newState.cookies
                 // Try to update local data with remote data
                 updateLocalDataWithRemoteData(cookies)
             }
