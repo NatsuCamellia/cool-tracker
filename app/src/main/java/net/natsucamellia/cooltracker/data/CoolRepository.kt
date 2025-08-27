@@ -2,7 +2,6 @@ package net.natsucamellia.cooltracker.data
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import net.natsucamellia.cooltracker.auth.AuthManager
@@ -14,14 +13,14 @@ import net.natsucamellia.cooltracker.model.Profile
 
 interface CoolRepository {
     /**
-     * Get the current user's profile information.
-     * @return user's profile information, null if failed.
+     * Get the current user's profile information from NTU COOL API.
+     * @return user's profile information flow, null flow if failed.
      */
     fun getUserProfile(): Flow<Profile?>
 
     /**
-     * Get the current user's active courses.
-     * @return list of active courses, null if failed.
+     * Get the current user's active courses with assignments from NTU COOL API.
+     * @return list of active courses flow, null flow if failed.
      */
     fun getActiveCoursesWithAssignments(): Flow<List<CourseWithAssignments>?>
 
@@ -39,7 +38,7 @@ class NetworkCoolRepository(
             authManager.loginState.collect { state ->
                 when (state) {
                     is LoginState.LoggedIn -> {
-                        refresh(state.cookies)
+                        updateLocalDataWithRemoteData(state.cookies)
                     }
 
                     is LoginState.LoggedOut -> {
@@ -52,45 +51,31 @@ class NetworkCoolRepository(
         }
     }
 
-    /**
-     * Get the current user's profile information from NTU COOL API.
-     * @return user's profile information flow, null flow if failed.
-     */
-    @OptIn(ExperimentalCoroutinesApi::class)
     override fun getUserProfile(): Flow<Profile?> = localCoolDataProvider.getProfile()
 
-    /**
-     * Get the current user's active courses from NTU COOL API.
-     * @return list of active courses flow, null flow if failed.
-     */
-    @OptIn(ExperimentalCoroutinesApi::class)
     override fun getActiveCoursesWithAssignments(): Flow<List<CourseWithAssignments>?> =
         localCoolDataProvider.getCoursesWithAssignments()
 
     override fun refresh(onDone: () -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
-            var state = authManager.loginState.value
-            if (state is LoginState.Disconnected) {
-                // Try to recover from offline
-                authManager.checkInitialStatus()
-                state = authManager.loginState.value
-            }
+            // Make sure the user is logged in before trying to refresh the data.
+            authManager.refreshLoginState()
+            val state = authManager.loginState.value
             if (state is LoginState.LoggedIn) {
-                refresh(state.cookies)
+                val cookies = state.cookies
+                // Try to update local data with remote data
+                updateLocalDataWithRemoteData(cookies)
             }
             onDone()
         }
     }
 
-    private suspend fun refresh(cookies: String) {
-        val profile = remoteCoolDataProvider.getUserProfile(cookies)
-        if (profile != null) {
-            localCoolDataProvider.saveProfile(profile)
+    private suspend fun updateLocalDataWithRemoteData(cookies: String) {
+        remoteCoolDataProvider.getUserProfile(cookies)?.let {
+            localCoolDataProvider.saveProfile(it)
         }
-        val coursesWithAssignments =
-            remoteCoolDataProvider.getActiveCoursesWithAssignments(cookies)
-        if (coursesWithAssignments != null) {
-            localCoolDataProvider.saveCoursesWithAssignments(coursesWithAssignments)
+        remoteCoolDataProvider.getActiveCoursesWithAssignments(cookies)?.let {
+            localCoolDataProvider.saveCoursesWithAssignments(it)
         }
     }
 }

@@ -1,8 +1,7 @@
 package net.natsucamellia.cooltracker.auth
 
-import android.content.SharedPreferences
 import android.util.Log
-import androidx.core.content.edit
+import android.webkit.CookieManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,93 +25,39 @@ sealed interface LoginState {
     object Loading : LoginState
 }
 
-class AuthManager(
-    private val sharedPref: SharedPreferences,
-    private val keystoreManager: KeystoreManager = KeystoreManager()
-) {
+class AuthManager() {
     private val _loginState = MutableStateFlow<LoginState>(LoginState.Loading)
     val loginState = _loginState.asStateFlow()
 
     init {
         CoroutineScope(Dispatchers.IO).launch {
-            checkInitialStatus()
+            refreshLoginState()
         }
-    }
-
-    fun login(cookie: String) {
-        CoroutineScope(Dispatchers.IO).launch {
-            when (validateCookie(cookie)) {
-                ValidateResult.Valid -> {
-                    _loginState.update { LoginState.LoggedIn(cookie) }
-                    saveUserSessionCookies(cookie)
-                }
-
-                ValidateResult.Invalid -> {
-                    _loginState.update { LoginState.LoggedOut }
-                }
-
-                ValidateResult.Disconnected -> {
-                    _loginState.update { LoginState.Disconnected }
-                }
-            }
-        }
-    }
-
-    fun logout() {
-        // Clear the cookies from repository, since it's expected not to automatically login when
-        // the app is started again. Also the user's intention is to clear the session, which is
-        // the reason the user try to logout.
-        _loginState.update { LoginState.LoggedOut }
-        clearUserSessionCookies()
-    }
-
-    /** Save user's session cookies to local storage */
-    private fun saveUserSessionCookies(cookies: String) {
-        val encryptedPair = keystoreManager.encrypt(cookies)
-        encryptedPair?.let { (encryptedCookies, iv) ->
-            sharedPref.edit {
-                putString(KEY_ENCRYPTED_COOKIES, encryptedCookies)
-                // Also store the initialization vector (IV) for decryption
-                putString(KEY_IV, iv)
-                apply()
-            }
-            Log.d(TAG, "User session cookies saved successfully.")
-        } ?: run {
-            Log.e(TAG, "Failed to encrypt cookies.")
-        }
-    }
-
-    /** Clear user's session cookies from local storage */
-    private fun clearUserSessionCookies() {
-        sharedPref.edit {
-            remove(KEY_ENCRYPTED_COOKIES)
-            remove(KEY_IV)
-            apply()
-        }
-        Log.d(TAG, "User session cookies cleared successfully.")
     }
 
     /**
-     * Try to login with user's session cookies in local storage.
+     * Log the user out.
      */
-    suspend fun checkInitialStatus() {
-        val encryptedData = sharedPref.getString(KEY_ENCRYPTED_COOKIES, null)
-        val iv = sharedPref.getString(KEY_IV, null)
+    fun logout() {
+        // Clear the cookies in the CookieManager, since it's expected not to automatically login
+        // when the app is started again. Also the user's intention is to clear the session, which
+        // is the reason the user try to logout.
+        _loginState.update { LoginState.LoggedOut }
+        CookieManager.getInstance().removeAllCookies(null)
+    }
 
-        if (encryptedData == null || iv == null) {
-            _loginState.update { LoginState.LoggedOut }
-            Log.d(TAG, "No stored user session cookies found.")
-            return
-        }
-
-        val cookie = keystoreManager.decrypt(encryptedData, iv)
+    /**
+     * Refresh the login state with user's session cookies in the CookieManager.
+     */
+    suspend fun refreshLoginState() {
+        val cookie = CookieManager.getInstance().getCookie("https://cool.ntu.edu.tw/")
         if (cookie == null) {
             _loginState.update { LoginState.LoggedOut }
             Log.d(TAG, "Cannot decrypt cookies.")
             return
         }
 
-        when (validateCookie(cookie)) {
+        when (validateCookies(cookie)) {
             ValidateResult.Valid -> {
                 _loginState.update { LoginState.LoggedIn(cookie) }
                 Log.d(TAG, "User session cookies loaded successfully.")
@@ -130,14 +75,17 @@ class AuthManager(
         }
     }
 
-    private suspend fun validateCookie(cookie: String): ValidateResult {
+    /**
+     * Validate if the cookies contain a valid session.
+     */
+    private suspend fun validateCookies(cookies: String): ValidateResult {
         // Try to load the profile page.
         // If the cookie is valid, the response will be successful.
         // Otherwise, the response will be a redirect.
         val client = OkHttpClient()
         val request = Request.Builder()
             .url("https://cool.ntu.edu.tw/profile")
-            .addHeader("Cookie", cookie)
+            .addHeader("Cookie", cookies)
             .build()
 
         // Make sure the network connection runs on IO thread
@@ -163,8 +111,6 @@ class AuthManager(
 
     companion object {
         private const val TAG = "AuthManager"
-        private const val KEY_ENCRYPTED_COOKIES = "encrypted_cool_cookies"
-        private const val KEY_IV = "cool_cookies_iv"
     }
 
     sealed interface ValidateResult {

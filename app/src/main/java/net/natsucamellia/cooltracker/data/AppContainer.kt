@@ -18,7 +18,6 @@ interface AppContainer {
 class DefaultAppContainer(
     private val application: Application
 ) : AppContainer {
-    private val PREF_NAME = "cool_tracker_prefs"
     private val coolApiUrl = "https://cool.ntu.edu.tw/api/v1/"
     private val retrofit = Retrofit.Builder()
         .addConverterFactory(GsonConverterFactory.create())
@@ -29,9 +28,7 @@ class DefaultAppContainer(
     }
 
     override val authManager by lazy {
-        AuthManager(
-            sharedPref = application.getSharedPreferences(PREF_NAME, Application.MODE_PRIVATE)
-        )
+        AuthManager()
     }
 
     private val coolDatabase by lazy {

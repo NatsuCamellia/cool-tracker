@@ -44,7 +44,7 @@ import net.natsucamellia.cooltracker.R
 @Composable
 fun WelcomeScreen(
     modifier: Modifier = Modifier,
-    onLoginSuccess: (String) -> Unit = {}
+    onLoginSuccess: () -> Unit = {}
 ) {
     val navController = rememberNavController()
 
@@ -145,14 +145,13 @@ const val SUCCESS_URL_PREFIX = "https://cool.ntu.edu.tw/?login_success=1"
 @Composable
 fun LoginWebViewScreen(
     modifier: Modifier = Modifier,
-    onLoginSuccess: (String) -> Unit
+    onLoginSuccess: () -> Unit = {}
 ) {
     // I'm not sure if we can obtain session cookies from external browsers, which is preferred,
     // but we use embedded WebView for now. If you know how to do it, please try.
     val context = LocalContext.current
     val cookieManager = CookieManager.getInstance()
     // Force logout. Otherwise the user may be stocked in the browser.
-    // TODO: Try to use CookieManager across the app
     cookieManager.removeAllCookies(null)
 
     AndroidView(
@@ -175,10 +174,7 @@ fun LoginWebViewScreen(
                             // The user has logged and been redirected to the homepage.
                             // Now we can obtain and pass the cookies to the callback and return
                             // to the app.
-                            val cookies: String = cookieManager.getCookie(url)
-                            onLoginSuccess(cookies)
-                            // Clear the cookies for privacy and security.
-                            cookieManager.removeAllCookies(null)
+                            onLoginSuccess()
                         }
                         super.onPageStarted(view, url, favicon)
                     }

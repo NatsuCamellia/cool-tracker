@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import net.natsucamellia.cooltracker.CoolApplication
 import net.natsucamellia.cooltracker.auth.AuthManager
 import net.natsucamellia.cooltracker.data.CoolRepository
@@ -63,10 +64,12 @@ class CoolViewModel(
     }
 
     /**
-     * Login to NTU COOL with the given [cookies].
+     * Try to log in to NTU COOL.
      */
-    fun login(cookies: String) {
-        authManager.login(cookies)
+    fun tryLogin() {
+        viewModelScope.launch {
+            authManager.refreshLoginState()
+        }
     }
 
     /**

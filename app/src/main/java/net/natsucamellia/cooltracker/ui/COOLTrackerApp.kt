@@ -56,7 +56,7 @@ fun COOLTrackerApp(
 
         LoginState.LoggedOut -> {
             WelcomeScreen(
-                onLoginSuccess = coolViewModel::login
+                onLoginSuccess = coolViewModel::tryLogin
             )
         }
 
