@@ -3,6 +3,10 @@ package net.natsucamellia.cooltracker.data
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import net.natsucamellia.cooltracker.auth.AuthManager
 import net.natsucamellia.cooltracker.auth.LoginState
@@ -12,6 +16,8 @@ import net.natsucamellia.cooltracker.model.CourseWithAssignments
 import net.natsucamellia.cooltracker.model.Profile
 
 interface CoolRepository {
+    val isLoading: StateFlow<Boolean>
+
     /**
      * Get the current user's profile information from NTU COOL API.
      * @return user's profile information flow, null flow if failed.
@@ -32,6 +38,9 @@ class NetworkCoolRepository(
     private val remoteCoolDataProvider: RemoteCoolDataProvider,
     private val authManager: AuthManager
 ) : CoolRepository {
+
+    private val _isLoading = MutableStateFlow(false)
+    override val isLoading = _isLoading.asStateFlow()
 
     init {
         CoroutineScope(Dispatchers.IO).launch {
@@ -76,11 +85,13 @@ class NetworkCoolRepository(
     }
 
     private suspend fun updateLocalDataWithRemoteData(cookies: String) {
+        _isLoading.update { true }
         remoteCoolDataProvider.getUserProfile(cookies)?.let {
             localCoolDataProvider.saveProfile(it)
         }
         remoteCoolDataProvider.getActiveCoursesWithAssignments(cookies)?.let {
             localCoolDataProvider.saveCoursesWithAssignments(it)
         }
+        _isLoading.update { false }
     }
 }

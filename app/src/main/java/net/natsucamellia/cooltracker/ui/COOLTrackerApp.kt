@@ -14,7 +14,6 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
@@ -97,8 +96,11 @@ fun LoggedInScreen(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
-    Surface(
-        color = MaterialTheme.colorScheme.surfaceContainer
+    CoolNavigationSuiteScaffold(
+        currentDestination = currentDestination,
+        navigateToTopLevelDestination = { coolDestination ->
+            navController.navigate(coolDestination.route)
+        }
     ) {
         when (uiState) {
             is CoolViewModel.CoolUiState.Error -> {
@@ -110,22 +112,15 @@ fun LoggedInScreen(
             }
 
             is CoolViewModel.CoolUiState.Success -> {
-                CoolNavigationSuiteScaffold(
-                    currentDestination = currentDestination,
-                    navigateToTopLevelDestination = { coolDestination ->
-                        navController.navigate(coolDestination.route)
-                    },
-                ) {
-                    CoolNavHost(
-                        navController = navController,
-                        uiState = uiState,
-                        refresh = coolViewModel::updateData,
-                        logout = coolViewModel::logout,
-                        modifier = Modifier
-                            .windowInsetsPadding(WindowInsets.navigationBars)
-                            .windowInsetsPadding(WindowInsets.statusBars)
-                    )
-                }
+                CoolNavHost(
+                    navController = navController,
+                    uiState = uiState,
+                    refresh = coolViewModel::updateData,
+                    logout = coolViewModel::logout,
+                    modifier = Modifier
+                        .windowInsetsPadding(WindowInsets.navigationBars)
+                        .windowInsetsPadding(WindowInsets.statusBars)
+                )
             }
         }
     }

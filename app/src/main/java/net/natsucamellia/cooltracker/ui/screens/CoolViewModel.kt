@@ -26,20 +26,19 @@ class CoolViewModel(
         SharingStarted.WhileSubscribed(5000),
         authManager.loginState.value
     )
-    private val isLoading = MutableStateFlow(false)
+    private val isRefreshing = MutableStateFlow(false)
     val coolUiState = combine(
         coolRepository.getActiveCoursesWithAssignments(),
         coolRepository.getUserProfile(),
-        isLoading
-    ) { courses, profile, isLoading ->
-        if (isLoading && (courses == null || profile == null)) {
-            // Only show loading when loading data for the first time
-            // or when the data is still null.
+        coolRepository.isLoading,
+        isRefreshing
+    ) { courses, profile, isLoading, isRefreshing ->
+        if (courses != null && profile != null) {
+            CoolUiState.Success(courses, profile, isRefreshing)
+        } else if (isLoading) {
             CoolUiState.Loading
-        } else if (courses == null || profile == null) {
-            CoolUiState.Error
         } else {
-            CoolUiState.Success(courses, profile, isLoading)
+            CoolUiState.Error
         }
     }.stateIn(
         viewModelScope,
@@ -54,10 +53,10 @@ class CoolViewModel(
     fun updateData(
         onDone: () -> Unit = {}
     ) {
-        isLoading.update { true }
+        isRefreshing.update { true }
         coolRepository.refresh(
             onDone = {
-                isLoading.update { false }
+                isRefreshing.update { false }
                 onDone()
             }
         )
