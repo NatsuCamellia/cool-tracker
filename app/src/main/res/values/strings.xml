@@ -30,4 +30,7 @@
     <string name="submitted">Submitted</string>
     <string name="pending">Pending</string>
     <string name="dashboard">Dashboard</string>
+    <string name="disconnected_desc">Disconnected from NTU COOL.</string>
+    <string name="retry">Retry</string>
+    <string name="reconnected_desc">Reconnected.</string>
 </resources>

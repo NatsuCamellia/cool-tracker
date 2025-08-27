@@ -27,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -37,6 +38,7 @@ import androidx.navigation.toRoute
 import androidx.window.core.layout.WindowSizeClass
 import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.launch
+import net.natsucamellia.cooltracker.R
 import net.natsucamellia.cooltracker.auth.LoginState
 import net.natsucamellia.cooltracker.model.Course
 import net.natsucamellia.cooltracker.nav.CoolNavigationDestination
@@ -103,10 +105,11 @@ fun LoggedInScreen(
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    LaunchedEffect(true) {
+    LaunchedEffect(context) {
         scope.launch {
             coolViewModel.loginStateEvent.scan(
                 initial = Pair<LoginState, LoginState>(LoginState.Loading, LoginState.Loading),
@@ -114,8 +117,8 @@ fun LoggedInScreen(
             ).collect { (prev, curr) ->
                 if (curr == LoginState.Disconnected) {
                     val result = snackbarHostState.showSnackbar(
-                        message = "Disconnected.",
-                        actionLabel = "Retry",
+                        message = context.getString(R.string.disconnected_desc),
+                        actionLabel = context.getString(R.string.retry),
                         withDismissAction = true
                     )
                     if (result == SnackbarResult.ActionPerformed) {
@@ -123,7 +126,7 @@ fun LoggedInScreen(
                     }
                 }
                 if (prev == LoginState.Disconnected && curr != LoginState.Disconnected) {
-                    snackbarHostState.showSnackbar("Reconnected.")
+                    snackbarHostState.showSnackbar(context.getString(R.string.reconnected_desc))
                 }
             }
         }

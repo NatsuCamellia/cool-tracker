@@ -30,4 +30,7 @@
     <string name="submitted">已繳交</string>
     <string name="pending">待繳交</string>
     <string name="dashboard">概覽</string>
+    <string name="disconnected_desc">與 NTU COOL 連線中斷。</string>
+    <string name="retry">重試</string>
+    <string name="reconnected_desc">已重新連接至 NTU COOL。</string>
 </resources>
