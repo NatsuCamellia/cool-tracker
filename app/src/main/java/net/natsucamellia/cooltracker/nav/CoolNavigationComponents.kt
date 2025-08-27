@@ -159,7 +159,7 @@ fun CoolNavigationRail(
 }
 
 private fun WindowSizeClass.isCompact() =
-    !isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
+    !isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)
 
 private fun NavDestination?.hasRoute(destination: CoolNavigationDestination): Boolean =
     this?.hasRoute(destination.route::class) ?: false
