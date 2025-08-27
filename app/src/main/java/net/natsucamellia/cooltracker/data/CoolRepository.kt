@@ -29,8 +29,6 @@ interface CoolRepository {
      * @return list of active courses flow, null flow if failed.
      */
     fun getActiveCoursesWithAssignments(): Flow<List<CourseWithAssignments>?>
-
-    fun refresh(onDone: () -> Unit = {})
 }
 
 class NetworkCoolRepository(
@@ -44,7 +42,7 @@ class NetworkCoolRepository(
 
     init {
         CoroutineScope(Dispatchers.IO).launch {
-            authManager.loginState.collect { state ->
+            authManager.loginStateEvent.collect { state ->
                 when (state) {
                     is LoginState.LoggedIn -> {
                         updateLocalDataWithRemoteData(state.cookies)
@@ -64,25 +62,6 @@ class NetworkCoolRepository(
 
     override fun getActiveCoursesWithAssignments(): Flow<List<CourseWithAssignments>?> =
         localCoolDataProvider.getCoursesWithAssignments()
-
-    override fun refresh(onDone: () -> Unit) {
-        CoroutineScope(Dispatchers.IO).launch {
-            val state = authManager.loginState.value
-            // Make sure the user is logged in before trying to refresh the data.
-            authManager.refreshLoginState()
-            val newState = authManager.loginState.value
-
-            // We check both the old state and new state because if the user was not logged in
-            // originally, the local data would be updated twice when the user logs in. One by this
-            // method another by the init listener block.
-            if (state is LoginState.LoggedIn && newState is LoginState.LoggedIn) {
-                val cookies = newState.cookies
-                // Try to update local data with remote data
-                updateLocalDataWithRemoteData(cookies)
-            }
-            onDone()
-        }
-    }
 
     private suspend fun updateLocalDataWithRemoteData(cookies: String) {
         _isLoading.update { true }

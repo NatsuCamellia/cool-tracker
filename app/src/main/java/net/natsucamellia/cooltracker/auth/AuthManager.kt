@@ -4,9 +4,8 @@ import android.util.Log
 import android.webkit.CookieManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -26,11 +25,12 @@ sealed interface LoginState {
 }
 
 class AuthManager() {
-    private val _loginState = MutableStateFlow<LoginState>(LoginState.Loading)
-    val loginState = _loginState.asStateFlow()
+    private val _loginStateEvent = MutableSharedFlow<LoginState>(replay = 1)
+    val loginStateEvent = _loginStateEvent.asSharedFlow()
 
     init {
         CoroutineScope(Dispatchers.IO).launch {
+            _loginStateEvent.emit(LoginState.Loading)
             refreshLoginState()
         }
     }
@@ -39,11 +39,13 @@ class AuthManager() {
      * Log the user out.
      */
     fun logout() {
-        // Clear the cookies in the CookieManager, since it's expected not to automatically login
-        // when the app is started again. Also the user's intention is to clear the session, which
-        // is the reason the user try to logout.
-        _loginState.update { LoginState.LoggedOut }
-        CookieManager.getInstance().removeAllCookies(null)
+        CoroutineScope(Dispatchers.IO).launch {
+            // Clear the cookies in the CookieManager, since it's expected not to automatically login
+            // when the app is started again. Also the user's intention is to clear the session, which
+            // is the reason the user try to logout.
+            CookieManager.getInstance().removeAllCookies(null)
+            _loginStateEvent.emit(LoginState.LoggedOut)
+        }
     }
 
     /**
@@ -52,24 +54,25 @@ class AuthManager() {
     suspend fun refreshLoginState() {
         val cookie = CookieManager.getInstance().getCookie("https://cool.ntu.edu.tw/")
         if (cookie == null) {
-            _loginState.update { LoginState.LoggedOut }
+            _loginStateEvent.emit(LoginState.LoggedOut)
             Log.d(TAG, "Cannot decrypt cookies.")
             return
         }
 
         when (validateCookies(cookie)) {
             ValidateResult.Valid -> {
-                _loginState.update { LoginState.LoggedIn(cookie) }
+                _loginStateEvent.emit(LoginState.LoggedIn(cookie))
                 Log.d(TAG, "User session cookies loaded successfully.")
             }
 
             ValidateResult.Invalid -> {
-                _loginState.update { LoginState.LoggedOut }
+                // TODO: Session timeout
+                _loginStateEvent.emit(LoginState.LoggedOut)
                 Log.d(TAG, "Invalid cookie")
             }
 
             ValidateResult.Disconnected -> {
-                _loginState.update { LoginState.Disconnected }
+                _loginStateEvent.emit(LoginState.Disconnected)
                 Log.d(TAG, "User is disconnected")
             }
         }

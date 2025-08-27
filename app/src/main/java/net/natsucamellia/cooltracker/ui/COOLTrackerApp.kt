@@ -14,11 +14,16 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -29,6 +34,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import androidx.window.core.layout.WindowSizeClass
+import kotlinx.coroutines.flow.scan
+import kotlinx.coroutines.launch
 import net.natsucamellia.cooltracker.auth.LoginState
 import net.natsucamellia.cooltracker.model.Course
 import net.natsucamellia.cooltracker.nav.CoolNavigationDestination
@@ -48,7 +55,7 @@ import net.natsucamellia.cooltracker.ui.screens.WelcomeScreen
 fun COOLTrackerApp(
     coolViewModel: CoolViewModel
 ) {
-    when (coolViewModel.loginState.collectAsState().value) {
+    when (coolViewModel.loginStateEvent.collectAsState(LoginState.Loading).value) {
         LoginState.Loading -> {
             InitScreen()
         }
@@ -95,8 +102,29 @@ fun LoggedInScreen(
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(true) {
+        scope.launch {
+            coolViewModel.loginStateEvent.scan(
+                initial = Pair<LoginState, LoginState>(LoginState.Loading, LoginState.Loading),
+                operation = { prev, curr -> Pair(prev.second, curr) }
+            ).collect { (prev, curr) ->
+                if (curr == LoginState.Disconnected) {
+                    snackbarHostState.showSnackbar("Disconnected.")
+                }
+                if (prev == LoginState.Disconnected && curr != LoginState.Disconnected) {
+                    snackbarHostState.showSnackbar("Reconnected.")
+                }
+            }
+        }
+    }
 
     CoolNavigationSuiteScaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
         currentDestination = currentDestination,
         navigateToTopLevelDestination = { coolDestination ->
             navController.navigate(coolDestination.route)
@@ -104,7 +132,7 @@ fun LoggedInScreen(
     ) {
         when (uiState) {
             is CoolViewModel.CoolUiState.Error -> {
-                ErrorScreen(onRetry = coolViewModel::updateData)
+                ErrorScreen(onRetry = coolViewModel::refresh)
             }
 
             is CoolViewModel.CoolUiState.Loading -> {
@@ -115,7 +143,7 @@ fun LoggedInScreen(
                 CoolNavHost(
                     navController = navController,
                     uiState = uiState,
-                    refresh = coolViewModel::updateData,
+                    refresh = coolViewModel::refresh,
                     logout = coolViewModel::logout,
                     modifier = Modifier
                         .windowInsetsPadding(WindowInsets.navigationBars)

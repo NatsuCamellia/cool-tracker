@@ -21,11 +21,7 @@ class CoolViewModel(
     private val coolRepository: CoolRepository,
     private val authManager: AuthManager
 ) : ViewModel() {
-    val loginState = authManager.loginState.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5000),
-        authManager.loginState.value
-    )
+    val loginStateEvent = authManager.loginStateEvent
     private val isRefreshing = MutableStateFlow(false)
     val coolUiState = combine(
         coolRepository.getActiveCoursesWithAssignments(),
@@ -47,19 +43,14 @@ class CoolViewModel(
     )
 
     /**
-     * Update the data from the repository.
-     * Calls [onDone] after the data is updated.
+     * Refresh the application data
      */
-    fun updateData(
-        onDone: () -> Unit = {}
-    ) {
-        isRefreshing.update { true }
-        coolRepository.refresh(
-            onDone = {
-                isRefreshing.update { false }
-                onDone()
-            }
-        )
+    fun refresh() {
+        viewModelScope.launch {
+            isRefreshing.update { true }
+            authManager.refreshLoginState()
+            isRefreshing.update { false }
+        }
     }
 
     /**
