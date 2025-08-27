@@ -1,6 +1,8 @@
 package net.natsucamellia.cooltracker.data
 
 import android.app.Application
+import android.content.Context
+import android.net.ConnectivityManager
 import androidx.room.Room
 import net.natsucamellia.cooltracker.auth.AuthManager
 import net.natsucamellia.cooltracker.data.local.LocalCoolDataProviderImpl
@@ -28,7 +30,9 @@ class DefaultAppContainer(
     }
 
     override val authManager by lazy {
-        AuthManager()
+        val connectivityManager =
+            application.applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        AuthManager(connectivityManager)
     }
 
     private val coolDatabase by lazy {

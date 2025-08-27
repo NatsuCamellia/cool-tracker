@@ -115,18 +115,21 @@ fun LoggedInScreen(
                 initial = Pair<LoginState, LoginState>(LoginState.Loading, LoginState.Loading),
                 operation = { prev, curr -> Pair(prev.second, curr) }
             ).collect { (prev, curr) ->
-                if (curr == LoginState.Disconnected) {
-                    val result = snackbarHostState.showSnackbar(
-                        message = context.getString(R.string.disconnected_desc),
-                        actionLabel = context.getString(R.string.retry),
-                        withDismissAction = true
-                    )
-                    if (result == SnackbarResult.ActionPerformed) {
-                        coolViewModel.refresh()
+                snackbarHostState.currentSnackbarData?.dismiss()
+                scope.launch {
+                    if (curr == LoginState.Disconnected) {
+                        val result = snackbarHostState.showSnackbar(
+                            message = context.getString(R.string.disconnected_desc),
+                            actionLabel = context.getString(R.string.retry),
+                            withDismissAction = true
+                        )
+                        if (result == SnackbarResult.ActionPerformed) {
+                            coolViewModel.refresh()
+                        }
                     }
-                }
-                if (prev == LoginState.Disconnected && curr != LoginState.Disconnected) {
-                    snackbarHostState.showSnackbar(context.getString(R.string.reconnected_desc))
+                    if (prev == LoginState.Disconnected && curr != LoginState.Disconnected) {
+                        snackbarHostState.showSnackbar(context.getString(R.string.reconnected_desc))
+                    }
                 }
             }
         }

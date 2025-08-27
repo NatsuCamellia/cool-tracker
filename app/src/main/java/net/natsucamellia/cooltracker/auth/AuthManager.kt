@@ -1,5 +1,7 @@
 package net.natsucamellia.cooltracker.auth
 
+import android.net.ConnectivityManager
+import android.net.Network
 import android.util.Log
 import android.webkit.CookieManager
 import kotlinx.coroutines.CoroutineScope
@@ -24,15 +26,35 @@ sealed interface LoginState {
     object Loading : LoginState
 }
 
-class AuthManager() {
+class AuthManager(
+    connectivityManager: ConnectivityManager
+) {
     private val _loginStateEvent = MutableSharedFlow<LoginState>(replay = 1)
     val loginStateEvent = _loginStateEvent.asSharedFlow()
+    private val networkCallback = object : ConnectivityManager.NetworkCallback() {
+        override fun onAvailable(network: Network) {
+            Log.d(TAG, "Network available")
+            super.onAvailable(network)
+            CoroutineScope(Dispatchers.IO).launch {
+                refreshLoginState()
+            }
+        }
+
+        override fun onLost(network: Network) {
+            Log.d(TAG, "Network lost")
+            super.onLost(network)
+            CoroutineScope(Dispatchers.IO).launch {
+                _loginStateEvent.emit(LoginState.Disconnected)
+            }
+        }
+    }
 
     init {
         CoroutineScope(Dispatchers.IO).launch {
             _loginStateEvent.emit(LoginState.Loading)
             refreshLoginState()
         }
+        connectivityManager.registerDefaultNetworkCallback(networkCallback)
     }
 
     /**
