@@ -13,6 +13,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import net.natsucamellia.cooltracker.glance.AssignmentsWidgetReceiver
 import net.natsucamellia.cooltracker.glance.DashboardWidgetReceiver
 import net.natsucamellia.cooltracker.ui.COOLTrackerApp
 import net.natsucamellia.cooltracker.ui.screens.CoolViewModel
@@ -44,6 +45,7 @@ class MainActivity : ComponentActivity() {
     private fun setWidgetsPreview(context: Context) {
         CoroutineScope(Dispatchers.IO).launch {
             GlanceAppWidgetManager(context).setWidgetPreviews(DashboardWidgetReceiver::class)
+            GlanceAppWidgetManager(context).setWidgetPreviews(AssignmentsWidgetReceiver::class)
         }
     }
 }

@@ -33,4 +33,9 @@
     <string name="disconnected_desc">與 NTU COOL 連線中斷。</string>
     <string name="retry">重試</string>
     <string name="reconnected_desc">已重新連接至 NTU COOL。</string>
+    <string name="assignments_widget_description">作業</string>
+    <string name="format_day">%1$d天</string>
+    <string name="format_hour">%1$d時</string>
+    <string name="format_minute">%1$d分</string>
+    <string name="assignments">作業</string>
 </resources>

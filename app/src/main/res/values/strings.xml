@@ -33,4 +33,9 @@
     <string name="disconnected_desc">Disconnected from NTU COOL.</string>
     <string name="retry">Retry</string>
     <string name="reconnected_desc">Reconnected.</string>
+    <string name="assignments_widget_description">Assignments</string>
+    <string name="format_day">%1$dd</string>
+    <string name="format_hour">%1$dh</string>
+    <string name="format_minute">%1$dm</string>
+    <string name="assignments">Assignments</string>
 </resources>

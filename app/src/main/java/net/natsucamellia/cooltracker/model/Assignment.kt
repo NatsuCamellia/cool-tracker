@@ -1,8 +1,11 @@
 package net.natsucamellia.cooltracker.model
 
+import android.content.Context
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
+import net.natsucamellia.cooltracker.R
+import kotlin.time.Clock
 import kotlin.time.Instant
 
 /**
@@ -29,7 +32,18 @@ data class Assignment(
     val courseId: Int,
     val submitted: Boolean,
     val htmlUrl: String
-)
+) {
+    fun remainingTimeOneUnit(context: Context): String {
+        val durationRemaining = dueTime - Clock.System.now()
+        if (durationRemaining.isNegative()) return "0s"
+        return durationRemaining.toComponents { days, hours, minutes, seconds, _ ->
+            if (days > 0) context.getString(R.string.format_day, days)
+            else if (hours > 0) context.getString(R.string.format_hour, hours)
+            else if (minutes > 0) context.getString(R.string.format_minute, minutes)
+            else context.getString(R.string.format_second, seconds)
+        }
+    }
+}
 
 val sampleAssignment: Assignment = Assignment(
     id = 309627,

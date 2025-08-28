@@ -167,7 +167,7 @@ class DashboardWidget : GlanceAppWidget() {
         }
     }
 
-    class RefreshWorker(
+    inner class DashboardWidgetRefreshWorker(
         private val context: Context,
         workerParams: WorkerParameters
     ) : CoroutineWorker(context, workerParams) {
@@ -181,7 +181,7 @@ class DashboardWidget : GlanceAppWidget() {
         fun updateAllWidgets(context: Context) {
             val constraints = Constraints.Builder()
                 .build()
-            val workRequest = OneTimeWorkRequestBuilder<RefreshWorker>()
+            val workRequest = OneTimeWorkRequestBuilder<DashboardWidgetRefreshWorker>()
                 .setConstraints(constraints)
                 .build()
 
