@@ -138,8 +138,12 @@ fun AssignmentListItem(
     )
 }
 
+fun openUrlIntent(url: String): Intent {
+    return Intent(Intent.ACTION_VIEW, url.toUri()).apply {
+        addFlags(FLAG_ACTIVITY_NEW_TASK)
+    }
+}
+
 private fun openUrl(context: Context, url: String) {
-    val intent = Intent(Intent.ACTION_VIEW, url.toUri())
-    intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
-    context.startActivity(intent)
+    context.startActivity(openUrlIntent(url))
 }

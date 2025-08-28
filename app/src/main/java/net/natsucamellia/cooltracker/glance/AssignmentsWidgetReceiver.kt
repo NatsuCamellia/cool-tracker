@@ -11,8 +11,11 @@ import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
 import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
+import androidx.glance.action.Action
+import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
+import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.components.TitleBar
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.lazy.LazyColumn
@@ -41,12 +44,14 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import net.natsucamellia.cooltracker.CoolApplication
+import net.natsucamellia.cooltracker.MainActivity
 import net.natsucamellia.cooltracker.R
 import net.natsucamellia.cooltracker.model.Assignment
 import net.natsucamellia.cooltracker.model.CourseWithAssignments
 import net.natsucamellia.cooltracker.model.chineseName
 import net.natsucamellia.cooltracker.model.sampleAssignment
 import net.natsucamellia.cooltracker.model.sampleCourse
+import net.natsucamellia.cooltracker.ui.widgets.openUrlIntent
 import kotlin.time.Clock
 
 class AssignmentsWidgetReceiver : GlanceAppWidgetReceiver() {
@@ -67,7 +72,10 @@ class AssignmentsWidget : GlanceAppWidget() {
             ) {
                 Content(
                     coursesWithAssignments,
-                    onRefresh = { updateAllWidgets(context) }
+                    onRefresh = { updateAllWidgets(context) },
+                    modifier = GlanceModifier.clickable(
+                        onClick = androidx.glance.action.actionStartActivity<MainActivity>()
+                    )
                 )
             }
         }
@@ -148,9 +156,11 @@ class AssignmentsWidget : GlanceAppWidget() {
             courseWithAssignments.assignments.filter {
                 it.dueTime > Clock.System.now()
             }.forEach {
+                val intent = openUrlIntent(it.htmlUrl)
                 AssignmentListItem(
                     assignment = it,
-                    modifier = GlanceModifier.padding(vertical = 2.dp)
+                    modifier = GlanceModifier.padding(vertical = 2.dp),
+                    onClickAction = actionStartActivity(intent)
                 )
             }
         }
@@ -159,7 +169,8 @@ class AssignmentsWidget : GlanceAppWidget() {
     @Composable
     fun AssignmentListItem(
         assignment: Assignment,
-        modifier: GlanceModifier = GlanceModifier
+        modifier: GlanceModifier = GlanceModifier,
+        onClickAction: Action? = null
     ) {
         val textStyle = TextStyle(
             color = GlanceTheme.colors.onPrimaryContainer,
@@ -170,13 +181,16 @@ class AssignmentsWidget : GlanceAppWidget() {
         Box(
             modifier = modifier
         ) {
+            var modifier = GlanceModifier
+                .cornerRadius(16.dp)
+                .background(MaterialTheme.colorScheme.primaryContainer)
+                .padding(horizontal = 12.dp)
+                .padding(vertical = 2.dp)
+                .fillMaxWidth()
+            if (onClickAction != null)
+                modifier = modifier.clickable(onClickAction)
             Row(
-                modifier = GlanceModifier
-                    .cornerRadius(16.dp)
-                    .background(MaterialTheme.colorScheme.primaryContainer)
-                    .padding(horizontal = 12.dp)
-                    .padding(vertical = 2.dp)
-                    .fillMaxWidth(),
+                modifier = modifier,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
