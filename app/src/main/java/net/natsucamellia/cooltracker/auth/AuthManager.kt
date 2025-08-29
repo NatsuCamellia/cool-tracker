@@ -15,8 +15,14 @@ import okhttp3.Request
 import okio.IOException
 
 sealed interface LoginState {
+    /**
+     * The user has logged in to NTU COOL.
+     */
     data class LoggedIn(val cookies: String) : LoginState
 
+    /**
+     * The user has logged out from NTU COOL.
+     */
     object LoggedOut : LoginState
 
     /** The session cookie exists, but can't be validated */
@@ -31,10 +37,13 @@ class AuthManager(
 ) {
     private val _loginStateEvent = MutableSharedFlow<LoginState>(replay = 1)
     val loginStateEvent = _loginStateEvent.asSharedFlow()
+
+    // This callback is used to monitor system connectivity change
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
             Log.d(TAG, "Network available")
             super.onAvailable(network)
+            // Refresh when the network is available
             CoroutineScope(Dispatchers.IO).launch {
                 refreshLoginState()
             }
@@ -50,10 +59,12 @@ class AuthManager(
     }
 
     init {
+        // Try to recover user's login session
         CoroutineScope(Dispatchers.IO).launch {
             _loginStateEvent.emit(LoginState.Loading)
             refreshLoginState()
         }
+        // Monitor system callback
         connectivityManager.registerDefaultNetworkCallback(networkCallback)
     }
 

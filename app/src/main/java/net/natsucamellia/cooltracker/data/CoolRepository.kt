@@ -41,6 +41,7 @@ class NetworkCoolRepository(
     override val isLoading = _isLoading.asStateFlow()
 
     init {
+        // Listen to the auth state and update the local data
         CoroutineScope(Dispatchers.IO).launch {
             authManager.loginStateEvent.collect { state ->
                 when (state) {

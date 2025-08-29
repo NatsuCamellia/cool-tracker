@@ -35,7 +35,9 @@ data class Assignment(
 ) {
     fun remainingTimeOneUnit(context: Context): String {
         val durationRemaining = dueTime - Clock.System.now()
-        if (durationRemaining.isNegative()) return "0s"
+        if (durationRemaining.isNegative()) {
+            return context.getString(R.string.format_second, 0)
+        }
         return durationRemaining.toComponents { days, hours, minutes, seconds, _ ->
             if (days > 0) context.getString(R.string.format_day, days)
             else if (hours > 0) context.getString(R.string.format_hour, hours)

@@ -48,9 +48,8 @@ import net.natsucamellia.cooltracker.R
 import net.natsucamellia.cooltracker.model.Assignment
 import net.natsucamellia.cooltracker.model.CourseWithAssignments
 import net.natsucamellia.cooltracker.model.chineseName
-import net.natsucamellia.cooltracker.model.sampleAssignment
-import net.natsucamellia.cooltracker.model.sampleCourse
-import net.natsucamellia.cooltracker.ui.widgets.openUrlIntent
+import net.natsucamellia.cooltracker.model.sampleCourseWithAssignments
+import net.natsucamellia.cooltracker.util.openUrlIntent
 import kotlin.time.Clock
 
 class AssignmentsWidgetReceiver : GlanceAppWidgetReceiver() {
@@ -86,12 +85,7 @@ class AssignmentsWidget : GlanceAppWidget() {
                 colors = GlanceTheme.colors
             ) {
                 Content(
-                    coursesWithAssignments = listOf(
-                        CourseWithAssignments(
-                            sampleCourse,
-                            listOf(sampleAssignment)
-                        )
-                    )
+                    coursesWithAssignments = listOf(sampleCourseWithAssignments)
                 )
             }
         }

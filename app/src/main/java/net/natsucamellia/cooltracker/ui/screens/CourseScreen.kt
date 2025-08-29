@@ -1,8 +1,5 @@
 package net.natsucamellia.cooltracker.ui.screens
 
-import android.content.Context
-import android.content.Intent
-import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,7 +33,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import net.natsucamellia.cooltracker.R
 import net.natsucamellia.cooltracker.model.Course
 import net.natsucamellia.cooltracker.model.CourseWithAssignments
@@ -44,6 +40,7 @@ import net.natsucamellia.cooltracker.model.chineseName
 import net.natsucamellia.cooltracker.model.englishName
 import net.natsucamellia.cooltracker.ui.widgets.AssignmentListItem
 import net.natsucamellia.cooltracker.ui.widgets.SectionLabel
+import net.natsucamellia.cooltracker.util.openUrl
 
 @Composable
 fun TwoPaneCourseView(
@@ -186,7 +183,12 @@ fun CourseDetailScreen(
                 },
                 actions = {
                     IconButton(
-                        onClick = { openCourseInBrowser(context = context, courseId = course.id) }
+                        onClick = {
+                            openUrl(
+                                context,
+                                "https://cool.ntu.edu.tw/courses/${courseWithAssignments.course.id}"
+                            )
+                        }
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Rounded.OpenInNew,
@@ -223,11 +225,4 @@ fun CourseDetailScreen(
             }
         }
     }
-}
-
-private fun openCourseInBrowser(context: Context, courseId: Int) {
-    val url = "https://cool.ntu.edu.tw/courses/$courseId"
-    val intent = Intent(Intent.ACTION_VIEW, url.toUri())
-    intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
-    context.startActivity(intent)
 }

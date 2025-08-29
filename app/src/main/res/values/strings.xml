@@ -38,4 +38,5 @@
     <string name="format_hour">%1$dh</string>
     <string name="format_minute">%1$dm</string>
     <string name="assignments">Assignments</string>
+    <string name="github_repo_link">https://github.com/natsucamellia/cool-tracker</string>
 </resources>

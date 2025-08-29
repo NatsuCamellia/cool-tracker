@@ -1,8 +1,6 @@
 package net.natsucamellia.cooltracker.ui.screens
 
 import android.content.Context
-import android.content.Intent
-import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -39,11 +37,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.core.net.toUri
 import coil3.compose.AsyncImage
 import net.natsucamellia.cooltracker.R
 import net.natsucamellia.cooltracker.model.Profile
 import net.natsucamellia.cooltracker.ui.widgets.SectionLabel
+import net.natsucamellia.cooltracker.util.openUrl
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -136,7 +134,7 @@ fun AccountScreen(
                         contentDescription = stringResource(R.string.source_code_desc)
                     )
                 },
-                onClick = { openGithub(context) }
+                onClick = { openUrl(context, context.getString(R.string.github_repo_link)) }
             )
             // Version
             SettingListItem(
@@ -235,13 +233,6 @@ fun LogoutDialog(
         },
         modifier = modifier
     )
-}
-
-private fun openGithub(context: Context) {
-    val url = "https://github.com/natsucamellia/cool-tracker"
-    val intent = Intent(Intent.ACTION_VIEW, url.toUri())
-    intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
-    context.startActivity(intent)
 }
 
 private fun getAppVersion(context: Context): String {

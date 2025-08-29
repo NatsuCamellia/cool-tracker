@@ -1,8 +1,5 @@
 package net.natsucamellia.cooltracker.ui.widgets
 
-import android.content.Context
-import android.content.Intent
-import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,14 +23,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
 import net.natsucamellia.cooltracker.model.Assignment
-import net.natsucamellia.cooltracker.ui.screens.formatDurationLargestTwoUnits
+import net.natsucamellia.cooltracker.util.openUrl
 import kotlin.time.Clock
 import kotlin.time.DurationUnit
 
@@ -123,12 +119,7 @@ fun AssignmentListItem(
                 Text(
                     text = dueLocalDateTime.format(format) +
                             if (durationRemaining.isPositive())
-                                " (${
-                                    formatDurationLargestTwoUnits(
-                                        LocalContext.current,
-                                        durationRemaining
-                                    )
-                                })"
+                                " (${assignment.remainingTimeOneUnit(context)})"
                             else
                                 "",
                     style = MaterialTheme.typography.labelSmall
@@ -136,14 +127,4 @@ fun AssignmentListItem(
             }
         }
     )
-}
-
-fun openUrlIntent(url: String): Intent {
-    return Intent(Intent.ACTION_VIEW, url.toUri()).apply {
-        addFlags(FLAG_ACTIVITY_NEW_TASK)
-    }
-}
-
-private fun openUrl(context: Context, url: String) {
-    context.startActivity(openUrlIntent(url))
 }
