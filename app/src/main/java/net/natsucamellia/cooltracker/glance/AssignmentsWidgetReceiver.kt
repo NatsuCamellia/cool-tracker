@@ -1,7 +1,6 @@
 package net.natsucamellia.cooltracker.glance
 
 import android.content.Context
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.unit.dp
@@ -150,7 +149,8 @@ class AssignmentsWidget : GlanceAppWidget() {
                 courseWithAssignments.course.chineseName,
                 maxLines = 1,
                 style = TextStyle(
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = GlanceTheme.colors.onBackground
                 )
             )
             courseWithAssignments.assignments.filter {
@@ -183,7 +183,7 @@ class AssignmentsWidget : GlanceAppWidget() {
         ) {
             var modifier = GlanceModifier
                 .cornerRadius(16.dp)
-                .background(MaterialTheme.colorScheme.primaryContainer)
+                .background(GlanceTheme.colors.primaryContainer)
                 .padding(horizontal = 12.dp)
                 .padding(vertical = 2.dp)
                 .fillMaxWidth()
