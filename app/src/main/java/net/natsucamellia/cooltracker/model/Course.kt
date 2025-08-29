@@ -1,5 +1,6 @@
 package net.natsucamellia.cooltracker.model
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -9,9 +10,13 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "course_table")
 data class Course(
     @PrimaryKey
+    @ColumnInfo("id")
     val id: Int,
+    @ColumnInfo("name")
     val name: String,
+    @ColumnInfo("is_public")
     val isPublic: Boolean,
+    @ColumnInfo("course_code")
     val courseCode: String,
 )
 

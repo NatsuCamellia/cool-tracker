@@ -11,7 +11,7 @@ data class CourseWithAssignments(
     val course: Course,
     @Relation(
         parentColumn = "id",
-        entityColumn = "courseId"
+        entityColumn = "course_id"
     )
     val assignments: List<Assignment>
 )

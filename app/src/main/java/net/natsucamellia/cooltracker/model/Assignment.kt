@@ -1,6 +1,7 @@
 package net.natsucamellia.cooltracker.model
 
 import android.content.Context
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
@@ -17,20 +18,28 @@ import kotlin.time.Instant
         ForeignKey(
             entity = Course::class,
             parentColumns = ["id"],
-            childColumns = ["courseId"],
+            childColumns = ["course_id"],
             onDelete = ForeignKey.CASCADE
         )
     ]
 )
 data class Assignment(
     @PrimaryKey
+    @ColumnInfo("id")
     val id: Int,
+    @ColumnInfo("due_time")
     val dueTime: Instant,
+    @ColumnInfo("points_possible")
     val pointsPossible: Double,
+    @ColumnInfo("created_time")
     val createdTime: Instant,
+    @ColumnInfo("name")
     val name: String,
+    @ColumnInfo("course_id")
     val courseId: Int,
+    @ColumnInfo("submitted")
     val submitted: Boolean,
+    @ColumnInfo("html_url")
     val htmlUrl: String
 ) {
     fun remainingTimeOneUnit(context: Context): String {
