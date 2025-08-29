@@ -30,4 +30,7 @@ interface CourseWithAssignmentsDao {
 
     @Query("DELETE FROM course_table")
     suspend fun clearAllCourses()
+
+    @Query("DELETE FROM assignment_table")
+    suspend fun clearAllAssignments()
 }

@@ -38,5 +38,6 @@ class LocalCoolDataProviderImpl(
     override suspend fun clearAll() {
         profileDao.clearAll()
         courseWithAssignmentsDao.clearAllCourses()
+        courseWithAssignmentsDao.clearAllAssignments()
     }
 }
