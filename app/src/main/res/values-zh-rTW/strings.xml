@@ -38,4 +38,8 @@
     <string name="format_hour">%1$d時</string>
     <string name="format_minute">%1$d分</string>
     <string name="assignments">作業</string>
+    <string name="channel_upcoming_assignments">將截止的作業</string>
+    <string name="notification_1d">「%1$s」將於 1 天內截止。</string>
+    <string name="notification_3d">「%1$s」將於 3 天內截止。</string>
+    <string name="channel_group_assignments">作業</string>
 </resources>

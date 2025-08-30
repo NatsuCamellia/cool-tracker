@@ -39,4 +39,8 @@
     <string name="format_minute">%1$dm</string>
     <string name="assignments">Assignments</string>
     <string name="github_repo_link" translatable="false">https://github.com/natsucamellia/cool-tracker</string>
+    <string name="channel_upcoming_assignments">Upcoming Assignments</string>
+    <string name="notification_1d">\"%1$s\" is due in 1 day.</string>
+    <string name="notification_3d">\"%1$s\" is due in 3 days.</string>
+    <string name="channel_group_assignments">Assignments</string>
 </resources>

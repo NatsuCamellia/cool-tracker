@@ -1,12 +1,15 @@
 package net.natsucamellia.cooltracker
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -32,6 +35,7 @@ class MainActivity : ComponentActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
             setWidgetsPreview(this@MainActivity)
         }
+        requestNotificationPermission()
 
         setContent {
             val coolViewModel = viewModel<CoolViewModel>(factory = CoolViewModel.Factory)
@@ -46,6 +50,23 @@ class MainActivity : ComponentActivity() {
         CoroutineScope(Dispatchers.IO).launch {
             GlanceAppWidgetManager(context).setWidgetPreviews(DashboardWidgetReceiver::class)
             GlanceAppWidgetManager(context).setWidgetPreviews(AssignmentsWidgetReceiver::class)
+        }
+    }
+
+    private fun requestNotificationPermission() {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // We only need to request the permission on Android 13 and later.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                    1
+                )
+            }
         }
     }
 }

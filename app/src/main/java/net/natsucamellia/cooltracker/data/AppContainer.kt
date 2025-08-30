@@ -9,6 +9,7 @@ import net.natsucamellia.cooltracker.data.local.LocalCoolDataProviderImpl
 import net.natsucamellia.cooltracker.data.local.db.CoolDatabase
 import net.natsucamellia.cooltracker.data.remote.RemoteCoolDataProviderImpl
 import net.natsucamellia.cooltracker.data.remote.api.CoolApiService
+import net.natsucamellia.cooltracker.notification.CoolNotificationManager
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -63,4 +64,10 @@ class DefaultAppContainer(
             authManager = authManager
         )
     }
+
+    // Create a notification manager to schedule notifications for upcoming assignments
+    private val coolNotificationManager = CoolNotificationManager(
+        context = application.applicationContext,
+        coolRepository = coolRepository
+    )
 }
