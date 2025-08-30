@@ -3,6 +3,7 @@
 ![GitHub License](https://img.shields.io/github/license/NatsuCamellia/cool-tracker)
 [![GitHub Release](https://img.shields.io/github/v/release/NatsuCamellia/cool-tracker)](https://github.com/NatsuCamellia/cool-tracker/releases)
 ![Static Badge](https://img.shields.io/badge/Platform-Android_10+-green)
+![Static Badge](https://img.shields.io/badge/Language-en--US%2C%20zh--TW-blue)
 
 COOL Tracker 是一款專為 [NTU COOL](https://cool.ntu.edu.tw/) 設計的 Android 應用程式，讓使用者能輕鬆追蹤所有作業進度。
 <p align="center" width="100%">
