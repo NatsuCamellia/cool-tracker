@@ -1,6 +1,5 @@
 package net.natsucamellia.cooltracker.ui.screens
 
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,7 +15,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.PlayCircle
-import androidx.compose.material.icons.outlined.StopCircle
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.HourglassTop
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -43,7 +41,6 @@ import net.natsucamellia.cooltracker.model.englishName
 import net.natsucamellia.cooltracker.ui.widgets.AssignmentListItem
 import net.natsucamellia.cooltracker.ui.widgets.SectionLabel
 import kotlin.time.Clock
-import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -104,32 +101,6 @@ fun HomeScreen(
             items(coursesWithAssignments) {
                 CourseCard(
                     courseWithAssignments = it,
-                    onGoing = true,
-                    modifier = Modifier.padding(vertical = 16.dp)
-                )
-            }
-
-            item {
-                Spacer(modifier = Modifier.height(32.dp))
-                Row(
-                    modifier = Modifier.padding(horizontal = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.StopCircle,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    SectionLabel(
-                        text = stringResource(R.string.closed)
-                    )
-                }
-            }
-            items(coursesWithAssignments) {
-                CourseCard(
-                    courseWithAssignments = it,
-                    onGoing = false,
                     modifier = Modifier.padding(vertical = 16.dp)
                 )
             }
@@ -213,17 +184,12 @@ fun DashboardItem(
 @Composable
 private fun CourseCard(
     courseWithAssignments: CourseWithAssignments,
-    modifier: Modifier = Modifier,
-    onGoing: Boolean? = null
+    modifier: Modifier = Modifier
 ) {
     val course = courseWithAssignments.course
     // Filter assignment based on onGoing
     val assignments = courseWithAssignments.assignments.filter {
-        when (onGoing) {
-            true -> it.dueTime > Clock.System.now()
-            false -> it.dueTime <= Clock.System.now()
-            null -> true
-        }
+        it.dueTime > Clock.System.now()
     }
 
     if (assignments.isNotEmpty()) {
@@ -258,33 +224,6 @@ private fun CourseCard(
                     )
                 }
             }
-        }
-    }
-}
-
-fun formatDurationLargestTwoUnits(context: Context, duration: Duration): String {
-    return duration.toComponents { days, hours, minutes, seconds, _ ->
-        val parts = mutableListOf<String>()
-        if (days > 0) parts.add(context.getString(R.string.format_day_hour, days, hours))
-        else if (hours > 0) parts.add(
-            context.getString(
-                R.string.format_hour_minute,
-                hours,
-                minutes
-            )
-        )
-        else if (minutes > 0) parts.add(
-            context.getString(
-                R.string.format_minute_second,
-                minutes,
-                seconds
-            )
-        )
-        else if (seconds > 0) parts.add(context.getString(R.string.format_second, seconds))
-        if (parts.isEmpty()) {
-            "0s"
-        } else {
-            parts.joinToString(" ")
         }
     }
 }
