@@ -19,9 +19,11 @@ interface CourseWithAssignmentsDao {
     suspend fun insertAllAssignments(assignment: List<Assignment>)
 
     @Transaction
-    suspend fun insertCourseWithAssignments(courseWithAssignments: CourseWithAssignments) {
-        insertCourse(courseWithAssignments.course)
-        insertAllAssignments(courseWithAssignments.assignments)
+    suspend fun insertCoursesWithAssignments(coursesWithAssignments: List<CourseWithAssignments>) {
+        coursesWithAssignments.forEach {
+            insertCourse(it.course)
+            insertAllAssignments(it.assignments)
+        }
     }
 
     @Transaction

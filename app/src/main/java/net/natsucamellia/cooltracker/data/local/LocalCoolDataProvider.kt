@@ -39,9 +39,7 @@ class LocalCoolDataProviderImpl(
     }
 
     override suspend fun saveCoursesWithAssignments(coursesWithAssignments: List<CourseWithAssignments>) {
-        coursesWithAssignments.forEach {
-            courseWithAssignmentsDao.insertCourseWithAssignments(it)
-        }
+        courseWithAssignmentsDao.insertCoursesWithAssignments(coursesWithAssignments)
     }
 
     override suspend fun clearAll() {
