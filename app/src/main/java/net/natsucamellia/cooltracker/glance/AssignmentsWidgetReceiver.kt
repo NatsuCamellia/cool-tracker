@@ -115,47 +115,35 @@ class AssignmentsWidget : GlanceAppWidget() {
                     )
                 }
             )
-            LazyColumn {
-                items(coursesWithAssignments.filter {
+            LazyColumn(
+                modifier = GlanceModifier.padding(horizontal = 12.dp)
+            ) {
+                coursesWithAssignments.filter {
                     it.assignments.any { assignment ->
                         assignment.dueTime > Clock.System.now()
                     }
-                }) {
-                    CourseSection(
-                        courseWithAssignments = it,
-                        modifier = GlanceModifier.padding(horizontal = 12.dp)
-                    )
+                }.forEach { courseWithAssignments ->
+                    item {
+                        Text(
+                            courseWithAssignments.course.chineseName,
+                            maxLines = 1,
+                            style = TextStyle(
+                                fontWeight = FontWeight.Bold,
+                                color = GlanceTheme.colors.onBackground
+                            )
+                        )
+                    }
+                    items(courseWithAssignments.assignments.filter {
+                        it.dueTime > Clock.System.now()
+                    }) {
+                        val intent = openUrlIntent(it.htmlUrl)
+                        AssignmentListItem(
+                            assignment = it,
+                            modifier = GlanceModifier.padding(vertical = 2.dp),
+                            onClickAction = actionStartActivity(intent)
+                        )
+                    }
                 }
-            }
-        }
-
-    }
-
-    @Composable
-    fun CourseSection(
-        courseWithAssignments: CourseWithAssignments,
-        modifier: GlanceModifier = GlanceModifier
-    ) {
-        Column(
-            modifier = modifier
-        ) {
-            Text(
-                courseWithAssignments.course.chineseName,
-                maxLines = 1,
-                style = TextStyle(
-                    fontWeight = FontWeight.Bold,
-                    color = GlanceTheme.colors.onBackground
-                )
-            )
-            courseWithAssignments.assignments.filter {
-                it.dueTime > Clock.System.now()
-            }.forEach {
-                val intent = openUrlIntent(it.htmlUrl)
-                AssignmentListItem(
-                    assignment = it,
-                    modifier = GlanceModifier.padding(vertical = 2.dp),
-                    onClickAction = actionStartActivity(intent)
-                )
             }
         }
     }
