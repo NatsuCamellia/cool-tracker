@@ -140,7 +140,7 @@ class RemoteCoolDataProviderImpl(
 
             // Map the DTOs to Assignment objects
             assignmentDTOs.mapNotNull {
-                if (it.dueAt == null) {
+                if (it.dueAt == null && it.lockAt == null) {
                     // The due date is unspecified, skip this assignment
                     // TODO: Maybe we need to show these assignments in the future.
                     null
@@ -149,7 +149,7 @@ class RemoteCoolDataProviderImpl(
                         id = it.id,
                         courseId = it.courseId,
                         name = it.name,
-                        dueTime = Instant.parse(it.dueAt),
+                        dueTime = Instant.parse(it.dueAt ?: it.lockAt!!),
                         pointsPossible = it.pointsPossible,
                         createdTime = Instant.parse(it.createdAt),
                         submitted = it.submission.workflowState != "unsubmitted",

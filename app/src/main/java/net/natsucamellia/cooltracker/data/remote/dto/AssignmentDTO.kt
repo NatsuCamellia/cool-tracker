@@ -8,6 +8,7 @@ import com.google.gson.annotations.SerializedName
 data class AssignmentDTO(
     @SerializedName("id") val id: Int,
     @SerializedName("due_at") val dueAt: String?,
+    @SerializedName("lock_at") val lockAt: String?,
     @SerializedName("points_possible") val pointsPossible: Double,
     @SerializedName("created_at") val createdAt: String,
     @SerializedName("name") val name: String,
