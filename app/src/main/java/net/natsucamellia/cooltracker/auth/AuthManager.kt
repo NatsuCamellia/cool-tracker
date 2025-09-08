@@ -117,10 +117,10 @@ class AuthManager(
     private suspend fun validateCookies(cookies: String): ValidateResult {
         // Try to load the profile page.
         // If the cookie is valid, the response will be successful.
-        // Otherwise, the response will be a redirect.
+        // Otherwise, the response will be 401 (Unauthorized).
         val client = OkHttpClient()
         val request = Request.Builder()
-            .url("https://cool.ntu.edu.tw/profile")
+            .url("https://cool.ntu.edu.tw/api/v1/users/self/profile")
             .addHeader("Cookie", cookies)
             .build()
 
@@ -130,7 +130,7 @@ class AuthManager(
                 client.newCall(request).execute().use { response ->
                     if (response.isSuccessful) {
                         return@withContext ValidateResult.Valid
-                    } else if (response.isRedirect) {
+                    } else if (response.code == 401) {
                         Log.d(TAG, "Invalid cookie")
                         return@withContext ValidateResult.Invalid
                     } else {
