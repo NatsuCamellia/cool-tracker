@@ -1,6 +1,7 @@
 package net.natsucamellia.cooltracker.data.local
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import net.natsucamellia.cooltracker.data.local.db.CourseWithAssignmentsDao
 import net.natsucamellia.cooltracker.data.local.db.ProfileDao
 import net.natsucamellia.cooltracker.model.CourseWithAssignments
@@ -23,7 +24,15 @@ class LocalCoolDataProviderImpl(
     override fun getProfile(): Flow<Profile?> = profileDao.getProfile()
 
     override fun getCoursesWithAssignments(): Flow<List<CourseWithAssignments>> =
-        courseWithAssignmentsDao.getCoursesWithAssignments()
+        // TODO: Use SQL to sort the assignments by due time.
+        courseWithAssignmentsDao.getCoursesWithAssignments().map { coursesWithAssignments ->
+            coursesWithAssignments.map { courseWithAssignments ->
+                CourseWithAssignments(
+                    course = courseWithAssignments.course,
+                    assignments = courseWithAssignments.assignments.sortedBy { it.dueTime }
+                )
+            }
+        }
 
     override suspend fun saveProfile(profile: Profile) {
         profileDao.insertProfile(profile)
